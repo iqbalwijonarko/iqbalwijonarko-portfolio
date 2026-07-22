@@ -334,10 +334,19 @@ mark.is-visible {
     gap: 32px;
   }
 
-  /* Center the photo once it stacks above the text */
+  /* Center the photo once it stacks above the text, and on mobile crop it to
+     a shorter, smaller portrait: keep the face + stickers (anchored to the
+     top), trim the lower torso, and re-round the corners via CSS since the
+     baked-in rounding is lost once the image is cover-cropped. */
   .about-photo img {
     margin-left: auto;
     margin-right: auto;
+    width: 210px;
+    max-width: 210px;
+    height: 230px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 22px;
   }
 
   /* Center the name + tagline and pull them closer to the photo */
