@@ -74,13 +74,14 @@ section {
   width: 100%;
   max-width: 300px;
   height: auto;
-  border-radius: 16px;
   display: block;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.10);
+  /* drop-shadow (not box-shadow) so the shadow follows the photo's actual
+     shape, not the transparent rectangular padding baked into the PNG. */
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.16));
   transform: perspective(900px) rotateX(0deg) rotateY(0deg) scale(1);
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+              filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, filter;
   backface-visibility: hidden;
 }
 

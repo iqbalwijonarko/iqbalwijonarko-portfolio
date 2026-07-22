@@ -47,7 +47,7 @@ function setupPhotoTilt() {
   const SCALE = 1.02; // subtle grow
 
   wrap.addEventListener("pointerenter", function () {
-    img.style.transition = "transform 0.12s ease-out, box-shadow 0.12s ease-out";
+    img.style.transition = "transform 0.12s ease-out, filter 0.12s ease-out";
   });
 
   wrap.addEventListener("pointermove", function (e) {
@@ -59,16 +59,18 @@ function setupPhotoTilt() {
     img.style.transform =
       "perspective(900px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) +
       "deg) scale(" + SCALE + ")";
-    const sx = -(px - 0.5) * 20;
-    const sy = -(py - 0.5) * 20;
-    img.style.boxShadow = sx.toFixed(0) + "px " + (sy + 16).toFixed(0) + "px 44px rgba(0, 0, 0, 0.22)";
+    // drop-shadow hugs the photo's shape; offset opposite the tilt for a light source.
+    const sx = -(px - 0.5) * 16;
+    const sy = -(py - 0.5) * 16;
+    img.style.filter =
+      "drop-shadow(" + sx.toFixed(0) + "px " + (sy + 12).toFixed(0) + "px 22px rgba(0, 0, 0, 0.26))";
   });
 
   wrap.addEventListener("pointerleave", function () {
     img.style.transition =
-      "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1)";
+      "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s cubic-bezier(0.22, 1, 0.36, 1)";
     img.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)";
-    img.style.boxShadow = "0 6px 22px rgba(0, 0, 0, 0.10)";
+    img.style.filter = "drop-shadow(0 6px 14px rgba(0, 0, 0, 0.16))";
   });
 }
 
