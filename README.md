@@ -9,8 +9,11 @@ A fully static site: plain HTML, CSS, and vanilla JavaScript. No frameworks, no 
 | `index.html` | The page skeleton (don't edit for content changes) |
 | `style.css` | All styling |
 | `script.js` | Reads `content.json` and fills in the page |
-| `content.json` | **All site content — the only file you edit** |
-| `assets/` | Your headshot and all logos |
+| `content.json` | **All homepage content — the only file you edit for the homepage** |
+| `posts.json` | **All blog posts — the only file you edit to add/edit posts** |
+| `blog.html` / `blog.js` | The blog listing page (search + category filters) |
+| `post.html` / `post.js` | Renders a single post from `posts.json` |
+| `assets/` | Your headshot, logos, and blog images (`assets/blog/`) |
 | `favicon.svg` | The "IW" browser-tab icon |
 | `CNAME` | Custom domain for GitHub Pages — don't delete |
 | `.nojekyll` | Tells GitHub Pages to serve files as-is |
@@ -71,6 +74,44 @@ If the project has no link, use `"url": null` and the link line is left out auto
 3. Logos are auto-fitted into the card, so any reasonable size works — roughly 400–600px wide is plenty.
 
 To swap your headshot, replace `assets/iqbal.png` with a new image of the same name (or change the `"photo"` path in `content.json`).
+
+## The blog
+
+The blog lives at `blog.html` (listing with live search + category filters) and each post opens on `post.html`. Every post is one entry in **`posts.json`** — that's the only file you edit to publish.
+
+### Adding a post
+
+Copy this block into the top of the `"posts"` list in `posts.json` (newest first is automatic — posts sort by date):
+
+```json
+{
+  "slug": "a-short-url-name",
+  "title": "Your Post Title",
+  "category": "Tech",
+  "date": "2026-07-25",
+  "image": "assets/blog/a-short-url-name.svg",
+  "excerpt": "One or two sentences shown on the listing page.",
+  "body": [
+    "A normal paragraph is just a string.",
+    { "type": "heading", "text": "A section heading" },
+    "Another paragraph after the heading.",
+    { "type": "list", "items": ["First point", "Second point"] },
+    { "type": "quote", "text": "A pull quote." },
+    { "type": "image", "src": "assets/blog/some-picture.jpg", "alt": "describe it", "caption": "optional caption" }
+  ]
+}
+```
+
+Field notes:
+- `slug` — lowercase, dashes, no spaces. It becomes the URL: `post.html?slug=a-short-url-name`.
+- `category` — anything you want. New categories appear as filter buttons automatically, with counts.
+- `date` — `YYYY-MM-DD`.
+- `image` — the thumbnail (listing) and hero (post). Put images in `assets/blog/`. Optional — omit it and the card just shows text.
+- `body` — an array. Plain strings become paragraphs; the typed objects above add headings, lists, quotes, and images.
+
+**Your workflow:** just write your post (title + text) and send it over — it gets turned into a `posts.json` entry, committed, and pushed. To do it yourself, edit `posts.json`, then `git add -A && git commit -m "New post" && git push`.
+
+After adding a post, also add its URL to `sitemap.xml` so Google finds it (copy the existing post `<url>` block and change the slug).
 
 ## Previewing locally
 
