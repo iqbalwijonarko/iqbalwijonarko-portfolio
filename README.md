@@ -1,7 +1,7 @@
 <div align="center">
 <br>
 
-<img src="assets/iqbal.png" alt="Iqbal Wijonarko" width="190">
+<img src="assets/iqbal_new.png" alt="Iqbal Wijonarko" width="190">
 
 # Iqbal Wijonarko
 
