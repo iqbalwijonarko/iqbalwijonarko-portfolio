@@ -281,6 +281,12 @@ mark.is-visible {
     margin-left: auto;
     margin-right: auto;
   }
+
+  /* Center the name + tagline and pull them closer to the photo */
+  #site-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -305,6 +311,20 @@ mark.is-visible {
     text-align: justify;
     hyphens: auto;
     -webkit-hyphens: auto;
+  }
+
+  /* Drop the "|" and stack the tagline into two centered lines */
+  .tagline-sep {
+    display: none;
+  }
+
+  .tagline-part {
+    display: block;
+  }
+
+  .tagline-part:last-child {
+    font-size: 0.9em;
+    margin-top: 3px;
   }
 }
 

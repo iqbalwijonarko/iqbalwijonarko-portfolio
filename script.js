@@ -143,7 +143,14 @@ function withHighlights(str) {
 
 function renderHeader(site) {
   document.getElementById("site-title").textContent = site.title;
-  document.getElementById("site-tagline").textContent = site.tagline;
+
+  // Split the tagline on "|" into parts so mobile can stack them (and drop the
+  // pipe). On desktop the parts render inline with the separator, unchanged.
+  const parts = String(site.tagline).split("|").map(function (s) { return s.trim(); });
+  document.getElementById("site-tagline").innerHTML = parts
+    .map(function (p) { return '<span class="tagline-part">' + escapeHTML(p) + "</span>"; })
+    .join('<span class="tagline-sep"> | </span>');
+
   document.title = site.title + " | From Technology to Strategy";
 }
 
