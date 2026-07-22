@@ -6,14 +6,16 @@
   },
   "about": {
     "photo": "assets/iqbal_new.png",
-    "greeting": "Hi! I'm Iqbal and I'm an Indonesian based in 📍 Boston, MA",
-    "paragraphs": [
-      "I am a strategic problem solver with a unique ability to translate complex data into significant business growth. My professional journey is defined by my transition from software engineering to strategy, where I now combine my technical expertise with a robust foundation in strategic analysis to drive high-impact results.",
-      "My experience has a proven track record of delivering outsized outcomes, from structuring market entry for an {{$851B}} sector that projected {{3x}} faster adoption to implementing strategic fees that helped a team exceed its revenue targets by up to {{152%}}. I excel at leading cross-functional teams and orchestrating initiatives that resulted in a {{55%}} growth in active users and an expansion of services to over 20,000+ merchants.",
-      "I am eager to discuss how this blend of analytical rigor and a bias for action can contribute to solving your most challenging client needs.",
-      "Let's talk strategy and drive impact together 🚀"
+    "eyebrow": "About",
+    "headline": "From software engineering to strategy.",
+    "lead": "I turn complex data into measurable business growth — pairing technical depth with strategic analysis. Indonesian, based in Boston, MA.",
+    "metrics": [
+      { "value": "$851B", "label": "Market entry sized" },
+      { "value": "3×", "label": "Faster projected adoption" },
+      { "value": "152%", "label": "Revenue target exceeded" },
+      { "value": "55%", "label": "Growth in active users" }
     ],
-    "highlightNote": "Text wrapped in {{double braces}} renders with a yellow marker highlight."
+    "cta": { "text": "Let's talk strategy", "href": "mailto:iqbal@bu.edu" }
   },
   "experience": [
     {

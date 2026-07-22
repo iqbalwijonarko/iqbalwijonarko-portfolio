@@ -62,12 +62,15 @@ section {
   margin-bottom: 28px;
 }
 
-/* ===== About ===== */
+/* ===== About =====
+   McKinsey-meets-Apple: one idea, sharp hierarchy, generous whitespace.
+   A quiet eyebrow, a single positioning headline, one supporting line —
+   with the proof pulled out into an exhibit-style metrics row below. */
 .about-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
-  gap: 40px;
-  align-items: start;
+  gap: 56px;
+  align-items: center;
 }
 
 .about-photo img {
@@ -85,25 +88,80 @@ section {
   backface-visibility: hidden;
 }
 
-.about-text h2 {
-  font-size: 1.9rem;
+.about-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  margin-bottom: 18px;
+}
+
+.about-headline {
+  font-size: 2.35rem;
   font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   color: #1a1a1a;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.about-greeting {
+.about-lead {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #555;
+  max-width: 46ch;
+}
+
+.about-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-decoration: none;
+  transition: gap 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+}
+
+.about-cta:hover {
+  color: #1a6fc4;
+  gap: 12px;
+}
+
+.about-cta-arrow {
+  font-weight: 400;
+}
+
+/* Exhibit-style proof row: the metrics that were buried in prose, now
+   front and center — big figures, quiet labels, a thin rule above each. */
+.about-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  margin-top: 64px;
+}
+
+.metric {
+  border-top: 2px solid #1a1a1a;
+  padding-top: 16px;
+}
+
+.metric-value {
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 14px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #1a1a1a;
+  font-variant-numeric: tabular-nums;
 }
 
-.about-text p {
-  margin-bottom: 14px;
-  color: #3d3d3d;
-}
-
-.about-text p:last-child {
-  margin-bottom: 0;
+.metric-label {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #757575;
 }
 
 mark {
@@ -273,7 +331,7 @@ mark.is-visible {
 @media (max-width: 768px) {
   .about-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 32px;
   }
 
   /* Center the photo once it stacks above the text */
@@ -286,6 +344,12 @@ mark.is-visible {
   #site-header {
     text-align: center;
     margin-bottom: 28px;
+  }
+
+  .about-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 32px;
+    margin-top: 48px;
   }
 }
 
@@ -307,10 +371,12 @@ mark.is-visible {
     gap: 12px;
   }
 
-  .about-text p {
-    text-align: justify;
-    hyphens: auto;
-    -webkit-hyphens: auto;
+  .about-headline {
+    font-size: 1.95rem;
+  }
+
+  .about-lead {
+    font-size: 1.05rem;
   }
 
   /* Drop the "|" and stack the tagline into two centered lines */

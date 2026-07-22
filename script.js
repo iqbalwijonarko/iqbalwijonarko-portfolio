@@ -82,7 +82,7 @@ function setupReveal() {
 
   const revealEls = Array.prototype.slice.call(
     document.querySelectorAll(
-      "#site-header, .about-photo, .about-text, .section-heading, .exp-card, .project-card, .contact-item"
+      "#site-header, .about-photo, .about-intro, .metric, .section-heading, .exp-card, .project-card, .contact-item"
     )
   );
   revealEls.forEach(function (el) { el.classList.add("reveal"); });
@@ -91,6 +91,13 @@ function setupReveal() {
   document.querySelectorAll(".card-grid").forEach(function (grid) {
     Array.prototype.slice.call(grid.children).forEach(function (card, i) {
       card.style.transitionDelay = (i % 3) * 0.07 + "s";
+    });
+  });
+
+  // Same soft cascade across the About metrics row.
+  document.querySelectorAll(".about-metrics").forEach(function (row) {
+    Array.prototype.slice.call(row.children).forEach(function (metric, i) {
+      metric.style.transitionDelay = i * 0.07 + "s";
     });
   });
 
@@ -162,13 +169,30 @@ function renderAbout(about) {
   img.width = 300;
   photoBox.appendChild(img);
 
-  const textBox = document.querySelector(".about-text");
-  let html = "<h2>About</h2>";
-  html += '<p class="about-greeting">' + withHighlights(about.greeting) + "</p>";
-  about.paragraphs.forEach(function (p) {
-    html += "<p>" + withHighlights(p) + "</p>";
-  });
-  textBox.innerHTML = html;
+  const intro = document.querySelector(".about-intro");
+  let html = '<p class="about-eyebrow">' + escapeHTML(about.eyebrow) + "</p>";
+  html += '<h2 class="about-headline">' + escapeHTML(about.headline) + "</h2>";
+  html += '<p class="about-lead">' + escapeHTML(about.lead) + "</p>";
+  if (about.cta && about.cta.href) {
+    html +=
+      '<a class="about-cta" href="' + escapeHTML(about.cta.href) + '">' +
+        escapeHTML(about.cta.text) +
+        '<span class="about-cta-arrow" aria-hidden="true">→</span>' +
+      "</a>";
+  }
+  intro.innerHTML = html;
+
+  const metricsBox = document.getElementById("about-metrics");
+  metricsBox.innerHTML = (about.metrics || [])
+    .map(function (m) {
+      return (
+        '<div class="metric">' +
+          '<div class="metric-value">' + escapeHTML(m.value) + "</div>" +
+          '<div class="metric-label">' + escapeHTML(m.label) + "</div>" +
+        "</div>"
+      );
+    })
+    .join("");
 }
 
 function renderCards(gridId, items, toHTML) {
