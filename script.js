@@ -28,6 +28,48 @@ async function init() {
   renderContact(content.contact);
 
   setupReveal();
+  setupPhotoTilt();
+}
+
+/* Subtle 3D tilt: the headshot leans toward the cursor with a light-source
+   shadow. Mouse only, and skipped entirely for reduced-motion / touch. */
+function setupPhotoTilt() {
+  const wrap = document.querySelector(".about-photo");
+  const img = wrap && wrap.querySelector("img");
+  if (!img) return;
+
+  const mq = window.matchMedia;
+  const reduce = mq && mq("(prefers-reduced-motion: reduce)").matches;
+  const canHover = mq && mq("(hover: hover) and (pointer: fine)").matches;
+  if (reduce || !canHover) return;
+
+  const MAX = 6;      // max tilt, degrees
+  const SCALE = 1.02; // subtle grow
+
+  wrap.addEventListener("pointerenter", function () {
+    img.style.transition = "transform 0.12s ease-out, box-shadow 0.12s ease-out";
+  });
+
+  wrap.addEventListener("pointermove", function (e) {
+    const r = wrap.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;   // 0..1 across
+    const py = (e.clientY - r.top) / r.height;   // 0..1 down
+    const ry = (px - 0.5) * 2 * MAX;             // horizontal -> rotateY
+    const rx = -(py - 0.5) * 2 * MAX;            // vertical -> rotateX
+    img.style.transform =
+      "perspective(900px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) +
+      "deg) scale(" + SCALE + ")";
+    const sx = -(px - 0.5) * 20;
+    const sy = -(py - 0.5) * 20;
+    img.style.boxShadow = sx.toFixed(0) + "px " + (sy + 16).toFixed(0) + "px 44px rgba(0, 0, 0, 0.22)";
+  });
+
+  wrap.addEventListener("pointerleave", function () {
+    img.style.transition =
+      "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1)";
+    img.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)";
+    img.style.boxShadow = "0 6px 22px rgba(0, 0, 0, 0.10)";
+  });
 }
 
 /* Gentle scroll-in reveals (fade/rise) + highlighter sweep on the <mark> spans.
