@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#1a1a1a"/>
-  <text x="32" y="43" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff176" text-anchor="middle">IW</text>
+  <defs>
+    <linearGradient id="iw" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a3c"/>
+      <stop offset="1" stop-color="#1d1d1f"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#iw)"/>
+  <text x="32" y="43" font-family="Inter, -apple-system, Helvetica, Arial, sans-serif" font-size="25" font-weight="600" fill="#ffffff" text-anchor="middle">IW</text>
 </svg>
