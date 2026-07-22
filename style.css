@@ -145,13 +145,6 @@ mark.is-visible {
   color: inherit;
   text-decoration: none;
   cursor: pointer;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-}
-
-.exp-card--link:hover,
-.exp-card--link:focus-visible {
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.10);
-  transform: translateY(-2px);
 }
 
 .exp-card--link:focus-visible {
@@ -653,12 +646,16 @@ mark.is-visible {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
 }
 
-/* Project card subtle hover */
-.project-card {
+/* Card float on hover — Experience, Education, and Past Projects share this.
+   Declared after .reveal.is-visible so the hover transform wins the cascade. */
+.project-card,
+.exp-card--link {
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-.project-card:hover {
+.project-card:hover,
+.exp-card--link:hover,
+.exp-card--link:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.10);
 }
