@@ -275,6 +275,12 @@ mark.is-visible {
     grid-template-columns: 1fr;
     gap: 28px;
   }
+
+  /* Center the photo once it stacks above the text */
+  .about-photo img {
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media (max-width: 600px) {
@@ -283,7 +289,7 @@ mark.is-visible {
   }
 
   .container {
-    padding: 40px 20px 64px;
+    padding: 40px 26px 64px;
   }
 
   #site-title {
