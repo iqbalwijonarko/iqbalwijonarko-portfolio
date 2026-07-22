@@ -271,8 +271,11 @@ function renderAbout(about) {
   html += '<h2 class="about-headline">' + escapeHTML(about.headline) + "</h2>";
   html += '<p class="about-lead">' + escapeHTML(about.lead) + "</p>";
   if (about.cta && about.cta.href) {
+    // External (http) links open in a new tab; mailto/anchor links stay in-page.
+    const external = /^https?:/i.test(about.cta.href);
+    const target = external ? ' target="_blank" rel="noopener noreferrer"' : "";
     html +=
-      '<a class="about-cta" href="' + escapeHTML(about.cta.href) + '">' +
+      '<a class="about-cta" href="' + escapeHTML(about.cta.href) + '"' + target + ">" +
         escapeHTML(about.cta.text) +
         '<span class="about-cta-arrow" aria-hidden="true">→</span>' +
       "</a>";
