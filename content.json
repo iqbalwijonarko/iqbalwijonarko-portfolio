@@ -20,32 +20,37 @@
       "company": "Iwaki America",
       "logo": "assets/iwaki-america.png",
       "title": "Digital Transformation Specialist",
-      "dates": "April 2026 - Present"
+      "dates": "April 2026 - Present",
+      "url": "https://iwakiamerica.com"
     },
     {
       "company": "Indonesia Lighthouse",
       "logo": "assets/indonesia-lighthouse.png",
       "title": "Project Manager",
-      "dates": "September 2025 - April 2026"
+      "dates": "September 2025 - April 2026",
+      "url": "https://indonesialighthouse.org/"
     },
     {
       "company": "Related",
       "logo": "assets/related.png",
       "title": "Strategy Consultant",
-      "dates": "January 2025 - March 2025"
+      "dates": "January 2025 - March 2025",
+      "url": "https://related.com"
     },
     {
       "company": "Wisery Labs",
       "logo": "assets/wisery-labs.png",
       "logoBackground": "#000000",
       "title": "Strategy Consultant",
-      "dates": "September 2024 - December 2024"
+      "dates": "September 2024 - December 2024",
+      "url": "https://wiserylabs.ai/"
     },
     {
       "company": "Sirclo",
       "logo": "assets/sirclo.png",
       "title": "Software Engineer",
-      "dates": "July 2021 - July 2023"
+      "dates": "July 2021 - July 2023",
+      "url": "https://sirclo.com"
     }
   ],
   "education": [
@@ -53,13 +58,15 @@
       "school": "Boston University",
       "logo": "assets/boston-university.png",
       "degree": "Master in Management",
-      "detail": "Questrom School of Business - Boston University"
+      "detail": "Questrom School of Business - Boston University",
+      "url": "https://www.bu.edu/questrom/"
     },
     {
       "school": "Universitas Indonesia",
       "logo": "assets/universitas-indonesia.png",
       "degree": "BSc in Computer Science",
-      "detail": "University of Indonesia"
+      "detail": "University of Indonesia",
+      "url": "https://www.ui.ac.id/en/"
     }
   ],
   "projects": [

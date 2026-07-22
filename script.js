@@ -19,10 +19,10 @@ async function init() {
   renderHeader(content.site);
   renderAbout(content.about);
   renderCards("experience-grid", content.experience, function (item) {
-    return expCard(item.logo, item.company, item.logoBackground, item.title, item.dates);
+    return expCard(item.logo, item.company, item.logoBackground, item.title, item.dates, item.url);
   });
   renderCards("education-grid", content.education, function (item) {
-    return expCard(item.logo, item.school, item.logoBackground, item.degree, item.detail);
+    return expCard(item.logo, item.school, item.logoBackground, item.degree, item.detail, item.url);
   });
   renderCards("projects-grid", content.projects, projectCard);
   renderContact(content.contact);
@@ -73,20 +73,26 @@ function renderCards(gridId, items, toHTML) {
   document.getElementById(gridId).innerHTML = items.map(toHTML).join("");
 }
 
-/* Shared card for Experience and Education */
-function expCard(logo, logoAlt, logoBackground, boldLine, subLine) {
+/* Shared card for Experience and Education.
+   Renders as a link (new tab) when the entry has a url, otherwise a plain card. */
+function expCard(logo, logoAlt, logoBackground, boldLine, subLine, url) {
   const bg = logoBackground ? ' style="background:' + escapeHTML(logoBackground) + '"' : "";
-  return (
-    '<div class="exp-card">' +
-      '<div class="logo-area"' + bg + ">" +
-        '<img src="' + escapeHTML(logo) + '" alt="' + escapeHTML(logoAlt) + ' logo">' +
-      "</div>" +
-      '<div class="card-footer">' +
-        '<div class="card-title">' + escapeHTML(boldLine) + "</div>" +
-        '<div class="card-sub">' + escapeHTML(subLine) + "</div>" +
-      "</div>" +
-    "</div>"
-  );
+  const inner =
+    '<div class="logo-area"' + bg + ">" +
+      '<img src="' + escapeHTML(logo) + '" alt="' + escapeHTML(logoAlt) + ' logo">' +
+    "</div>" +
+    '<div class="card-footer">' +
+      '<div class="card-title">' + escapeHTML(boldLine) + "</div>" +
+      '<div class="card-sub">' + escapeHTML(subLine) + "</div>" +
+    "</div>";
+
+  if (url) {
+    return (
+      '<a class="exp-card exp-card--link" href="' + escapeHTML(url) +
+        '" target="_blank" rel="noopener noreferrer">' + inner + "</a>"
+    );
+  }
+  return '<div class="exp-card">' + inner + "</div>";
 }
 
 function projectCard(project) {

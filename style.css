@@ -123,6 +123,25 @@ mark {
   flex-direction: column;
 }
 
+/* Clickable cards (entries with a url) */
+.exp-card--link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.exp-card--link:hover,
+.exp-card--link:focus-visible {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
+  transform: translateY(-3px);
+}
+
+.exp-card--link:focus-visible {
+  outline: 2px solid #1a6fc4;
+  outline-offset: 2px;
+}
+
 .exp-card .logo-area {
   background: #fff;
   height: 110px;

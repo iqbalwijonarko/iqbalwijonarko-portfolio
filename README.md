@@ -37,11 +37,16 @@ Copy this block, paste it into the `"experience"` list (order in the file = orde
   "company": "New Company",
   "logo": "assets/new-company.png",
   "title": "Your Job Title",
-  "dates": "January 2027 - Present"
+  "dates": "January 2027 - Present",
+  "url": "https://newcompany.com"
 }
 ```
 
-Optional: add `"logoBackground": "#000000"` if the logo is white/light and needs a dark background (like Wisery Labs).
+Optional fields:
+- `"url"` makes the whole card clickable, opening that link in a new tab. Leave it out (or remove the line) and the card simply isn't clickable.
+- `"logoBackground": "#000000"` if the logo is white/light and needs a dark background (like Wisery Labs).
+
+Education cards work the same way — each `education` entry also accepts a `"url"`.
 
 ### Adding a new Project card
 
