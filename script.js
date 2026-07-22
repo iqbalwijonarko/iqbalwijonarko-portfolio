@@ -26,6 +26,57 @@ async function init() {
   });
   renderCards("projects-grid", content.projects, projectCard);
   renderContact(content.contact);
+
+  setupReveal();
+}
+
+/* Gentle scroll-in reveals (fade/rise) + highlighter sweep on the <mark> spans.
+   Purely additive: if IntersectionObserver is missing or the visitor prefers
+   reduced motion, everything is simply shown in its final state. */
+function setupReveal() {
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const revealEls = Array.prototype.slice.call(
+    document.querySelectorAll(
+      "#site-header, .about-photo, .about-text, .section-heading, .exp-card, .project-card, .contact-item"
+    )
+  );
+  revealEls.forEach(function (el) { el.classList.add("reveal"); });
+
+  // Stagger cards within each grid row for a soft cascade.
+  document.querySelectorAll(".card-grid").forEach(function (grid) {
+    Array.prototype.slice.call(grid.children).forEach(function (card, i) {
+      card.style.transitionDelay = (i % 3) * 0.07 + "s";
+    });
+  });
+
+  const marks = document.querySelectorAll("mark");
+
+  if (reduce || !("IntersectionObserver" in window)) {
+    revealEls.forEach(function (el) { el.classList.add("is-visible"); });
+    marks.forEach(function (m) { m.classList.add("is-visible"); });
+    return;
+  }
+
+  const reveal = new IntersectionObserver(function (entries, obs) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+  revealEls.forEach(function (el) { reveal.observe(el); });
+
+  const sweep = new IntersectionObserver(function (entries, obs) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.6 });
+  marks.forEach(function (m) { sweep.observe(m); });
 }
 
 /* ---------- helpers ---------- */

@@ -76,6 +76,14 @@ section {
   height: auto;
   border-radius: 16px;
   display: block;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.10);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-photo img:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.18);
 }
 
 .about-text h2 {
@@ -100,10 +108,19 @@ section {
 }
 
 mark {
-  background: #fff176;
   color: inherit;
   padding: 0.05em 0.25em;
   border-radius: 3px;
+  background-color: transparent;
+  background-image: linear-gradient(#fff176, #fff176);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0% 100%;
+  transition: background-size 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+mark.is-visible {
+  background-size: 100% 100%;
 }
 
 /* ===== Card grids (Experience / Education / Projects) ===== */
@@ -609,5 +626,60 @@ mark {
 
   .post-title {
     font-size: 1.8rem;
+  }
+}
+
+/* ===== Motion: gentle Apple-style reveals & hovers ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Blog thumbnail hover lift */
+.post-thumb img {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.post-thumb:hover img {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+}
+
+/* Project card subtle hover */
+.project-card {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  mark {
+    background-size: 100% 100%;
+    transition: none;
+  }
+
+  .about-photo img,
+  .post-thumb img,
+  .project-card,
+  .exp-card--link {
+    transition: none;
   }
 }
