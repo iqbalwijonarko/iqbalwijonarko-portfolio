@@ -21,6 +21,22 @@
         { "type": "quote", "text": "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti." },
         "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus."
       ]
+    },
+    {
+      "slug": "second-post",
+      "title": "Quis Nostrud Exercitation Ullamco Laboris",
+      "category": "Strategy",
+      "date": "2026-07-14",
+      "image": "assets/blog/second-post.svg",
+      "excerpt": "Vivamus lacinia odio vitae vestibulum. Curabitur aliquet quam id dui posuere blandit, praesent sapien massa convallis pellentesque.",
+      "body": [
+        "Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada. Nulla porttitor accumsan tincidunt. Curabitur aliquet quam id dui posuere blandit. Praesent sapien massa, convallis a pellentesque nec, egestas non nisi.",
+        "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula.",
+        { "type": "heading", "text": "Pellentesque In Ipsum Id Orci" },
+        "Pellentesque in ipsum id orci porta dapibus. Proin eget tortor risus. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui. Donec sollicitudin molestie malesuada.",
+        { "type": "quote", "text": "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a — sed porttitor lectus nibh." },
+        "Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Nulla quis lorem ut libero malesuada feugiat. Praesent sapien massa, convallis a pellentesque nec."
+      ]
     }
   ]
 }
