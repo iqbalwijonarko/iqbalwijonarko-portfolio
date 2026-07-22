@@ -8,12 +8,12 @@
     "photo": "assets/iqbal_new.png",
     "eyebrow": "About",
     "headline": "From software engineering to strategy.",
-    "lead": "I turn complex data into measurable business growth — pairing technical depth with strategic analysis. Indonesian, based in Boston, MA.",
+    "lead": "I lead AI and digital transformation programs, pairing an engineering background with strategic judgment. Indonesian, based in Boston, MA.",
     "metrics": [
-      { "value": "$851B", "label": "Market entry sized" },
-      { "value": "3×", "label": "Faster projected adoption" },
       { "value": "152%", "label": "Revenue target exceeded" },
-      { "value": "55%", "label": "Growth in active users" }
+      { "value": "20K+", "label": "Merchants expanded to new sales channels" },
+      { "value": "55%", "label": "Growth in active users" },
+      { "value": "9", "label": "Departments in the AI transformation I lead" }
     ],
     "cta": { "text": "Let's talk strategy", "href": "https://www.linkedin.com/in/iqbalwijonarko/" }
   },
