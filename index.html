@@ -19,34 +19,58 @@
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-  <!-- Structured data: tells Google this site and these profiles are the same person.
-       Edit the profile URLs in the "sameAs" list if any change. -->
+  <!-- Structured data (Google ProfilePage spec): tells Google this page IS the
+       profile of this person, and these external profiles are the same person.
+       Edit the URLs in the "sameAs" list if any change. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "Iqbal Wijonarko",
-    "alternateName": "Muhammad Iqbal Wijonarko",
-    "url": "https://iqbalwijonarko.com/",
-    "image": "https://iqbalwijonarko.com/assets/iqbal_new.png",
-    "jobTitle": "Digital Transformation Specialist",
-    "worksFor": { "@type": "Organization", "name": "Iwaki America" },
-    "alumniOf": [
-      { "@type": "CollegeOrUniversity", "name": "Questrom School of Business, Boston University" },
-      { "@type": "CollegeOrUniversity", "name": "Universitas Indonesia" }
-    ],
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Boston",
-      "addressRegion": "MA",
-      "addressCountry": "US"
-    },
-    "email": "mailto:iqbal@bu.edu",
-    "description": "Strategic problem solver bridging software engineering and business strategy.",
-    "sameAs": [
-      "https://www.linkedin.com/in/iqbalwijonarko/",
-      "https://github.com/iqbalwijonarko",
-      "https://www.instagram.com/iqbalwijonarko/"
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://iqbalwijonarko.com/#website",
+        "url": "https://iqbalwijonarko.com/",
+        "name": "Iqbal Wijonarko",
+        "publisher": { "@id": "https://iqbalwijonarko.com/#person" }
+      },
+      {
+        "@type": "ProfilePage",
+        "@id": "https://iqbalwijonarko.com/#profilepage",
+        "url": "https://iqbalwijonarko.com/",
+        "isPartOf": { "@id": "https://iqbalwijonarko.com/#website" },
+        "dateCreated": "2026-07-21T00:00:00-04:00",
+        "dateModified": "2026-07-21T00:00:00-04:00",
+        "mainEntity": {
+          "@type": "Person",
+          "@id": "https://iqbalwijonarko.com/#person",
+          "name": "Iqbal Wijonarko",
+          "alternateName": ["Muhammad Iqbal Wijonarko", "iqbalwijonarko"],
+          "url": "https://iqbalwijonarko.com/",
+          "image": "https://iqbalwijonarko.com/assets/iqbal_new.png",
+          "jobTitle": "Digital Transformation Specialist",
+          "worksFor": { "@type": "Organization", "name": "Iwaki America" },
+          "alumniOf": [
+            { "@type": "CollegeOrUniversity", "name": "Questrom School of Business, Boston University" },
+            { "@type": "CollegeOrUniversity", "name": "Universitas Indonesia" }
+          ],
+          "knowsAbout": ["Digital Transformation", "Business Strategy", "Software Engineering", "Product Management"],
+          "nationality": { "@type": "Country", "name": "Indonesia" },
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Boston",
+            "addressRegion": "MA",
+            "addressCountry": "US"
+          },
+          "email": "mailto:iqbal@bu.edu",
+          "description": "Digital Transformation Specialist at Iwaki America and Questrom (Boston University) MiM. Strategic problem solver bridging software engineering and business strategy.",
+          "sameAs": [
+            "https://www.linkedin.com/in/iqbalwijonarko/",
+            "https://github.com/iqbalwijonarko",
+            "https://www.instagram.com/iqbalwijonarko/",
+            "https://medium.com/@iqbal.thea32"
+          ]
+        }
+      }
     ]
   }
   </script>
