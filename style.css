@@ -300,6 +300,12 @@ mark.is-visible {
     flex-direction: column;
     gap: 12px;
   }
+
+  .about-text p {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
 }
 
 /* ===== Top navigation ===== */
