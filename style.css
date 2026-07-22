@@ -1,0 +1,269 @@
+/* ===== Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+}
+
+a {
+  color: #1a6fc4;
+}
+
+a:hover {
+  color: #12518f;
+}
+
+/* ===== Header ===== */
+#site-header {
+  margin-bottom: 56px;
+}
+
+#site-title {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+}
+
+#site-tagline {
+  margin-top: 8px;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #757575;
+}
+
+/* ===== Sections ===== */
+section {
+  margin-bottom: 72px;
+}
+
+.section-heading {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  margin-bottom: 28px;
+}
+
+/* ===== About ===== */
+.about-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.about-photo img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  border-radius: 16px;
+  display: block;
+}
+
+.about-text h2 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.about-greeting {
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.about-text p {
+  margin-bottom: 14px;
+  color: #3d3d3d;
+}
+
+.about-text p:last-child {
+  margin-bottom: 0;
+}
+
+mark {
+  background: #fff176;
+  color: inherit;
+  padding: 0.05em 0.25em;
+  border-radius: 3px;
+}
+
+/* ===== Card grids (Experience / Education / Projects) ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* Experience & Education cards */
+.exp-card {
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.exp-card .logo-area {
+  background: #fff;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.exp-card .logo-area img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.exp-card .card-footer {
+  background: #cfe3f5;
+  padding: 14px 16px;
+  flex: 1;
+}
+
+.exp-card .card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #1a1a1a;
+}
+
+.exp-card .card-sub {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #4a5a68;
+}
+
+/* Project cards */
+.project-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.project-tags .tag {
+  background: #f0f0f0;
+  color: #555;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.project-desc {
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.55;
+  flex: 1;
+}
+
+.project-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+
+/* ===== Contact ===== */
+#contact-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 48px;
+}
+
+.contact-item {
+  font-size: 1rem;
+}
+
+/* ===== Load-error notice (file:// fallback) ===== */
+.load-error {
+  border: 1px solid #f0c36d;
+  background: #fff8e1;
+  border-radius: 10px;
+  padding: 20px 24px;
+  line-height: 1.7;
+}
+
+.load-error code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #site-title {
+    font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 600px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 40px 20px 64px;
+  }
+
+  #site-title {
+    font-size: 2rem;
+  }
+
+  #contact-items {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

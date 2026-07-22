@@ -1,0 +1,115 @@
+{
+  "site": {
+    "title": "Iqbal Wijonarko",
+    "tagline": "From Technology to Strategy | Questrom School of Business",
+    "domain": "iqbalwijonarko.com"
+  },
+  "about": {
+    "photo": "assets/iqbal.png",
+    "greeting": "Hi! I'm Iqbal and I'm an Indonesian based in 📍 Boston, MA",
+    "paragraphs": [
+      "I am a strategic problem solver with a unique ability to translate complex data into significant business growth. My professional journey is defined by my transition from software engineering to strategy, where I now combine my technical expertise with a robust foundation in strategic analysis to drive high-impact results.",
+      "My experience has a proven track record of delivering outsized outcomes, from structuring market entry for an {{$851B}} sector that projected {{3x}} faster adoption to implementing strategic fees that helped a team exceed its revenue targets by up to {{152%}}. I excel at leading cross-functional teams and orchestrating initiatives that resulted in a {{55%}} growth in active users and an expansion of services to over 20,000+ merchants.",
+      "I am eager to discuss how this blend of analytical rigor and a bias for action can contribute to solving your most challenging client needs.",
+      "Let's talk strategy and drive impact together 🚀"
+    ],
+    "highlightNote": "Text wrapped in {{double braces}} renders with a yellow marker highlight."
+  },
+  "experience": [
+    {
+      "company": "Iwaki America",
+      "logo": "assets/iwaki-america.png",
+      "title": "Digital Transformation Specialist",
+      "dates": "April 2026 - Present"
+    },
+    {
+      "company": "Indonesia Lighthouse",
+      "logo": "assets/indonesia-lighthouse.png",
+      "title": "Project Manager",
+      "dates": "September 2025 - April 2026"
+    },
+    {
+      "company": "Related",
+      "logo": "assets/related.png",
+      "title": "Strategy Consultant",
+      "dates": "January 2025 - March 2025"
+    },
+    {
+      "company": "Wisery Labs",
+      "logo": "assets/wisery-labs.png",
+      "logoBackground": "#000000",
+      "title": "Strategy Consultant",
+      "dates": "September 2024 - December 2024"
+    },
+    {
+      "company": "Sirclo",
+      "logo": "assets/sirclo.png",
+      "title": "Software Engineer",
+      "dates": "July 2021 - July 2023"
+    }
+  ],
+  "education": [
+    {
+      "school": "Boston University",
+      "logo": "assets/boston-university.png",
+      "degree": "Master in Management",
+      "detail": "Questrom School of Business - Boston University"
+    },
+    {
+      "school": "Universitas Indonesia",
+      "logo": "assets/universitas-indonesia.png",
+      "degree": "BSc in Computer Science",
+      "detail": "University of Indonesia"
+    }
+  ],
+  "projects": [
+    {
+      "emoji": "🛠️",
+      "name": "GetAway Venture",
+      "tags": ["venture strategy", "travel fintech"],
+      "description": "Built a venture plan targeting the $16B points market. Modeled $21M in revenue by Year 8 and formulated a $3.4M seed stage pitch.",
+      "url": "https://1drv.ms/b/c/d52a745ba2f8ada7/IQBZzL9-51OAS7YG14vqRBnPASy9crlBxZyXpBt3CuwvgqM?e=uSO8AC"
+    },
+    {
+      "emoji": "👷",
+      "name": "Hasta Dwiyustama Company Website",
+      "tags": ["website", "social"],
+      "description": "Directed PT. Hasta Dwiyustama's website development using Next.js and SCSS, achieving a 40% increase in user engagement.",
+      "url": "https://hdl.co.id/"
+    },
+    {
+      "emoji": "💰",
+      "name": "Laywook",
+      "tags": ["mobile", "finance"],
+      "description": "Create a system that streamlines the economic management of cooperatives by recording all member savings and transactions comprehensively.",
+      "url": null
+    },
+    {
+      "emoji": "🌿",
+      "name": "Biotis Reporting System",
+      "tags": ["website", "dashboard"],
+      "description": "Biotis Employee Reporting System (EARS), a task management tool revolutionizing operations across a vast agricultural distribution network.",
+      "url": "https://biotis-staff.com/"
+    },
+    {
+      "emoji": "🖥️",
+      "name": "COMPFEST 12",
+      "tags": ["event", "social"],
+      "description": "Led a 39-member event division to execute the Biggest IT Event Held by Students in Indonesia, delivering a high-impact nationwide showcase.",
+      "url": "https://compfest.id/"
+    },
+    {
+      "emoji": "🎉",
+      "name": "World Angklung Day in San Fransisco",
+      "tags": ["event", "culture"],
+      "description": "Celebrate 15 years of UNESCO Angklung recognition with a U.S.-Indonesia showcase of music, culture, and collaboration.",
+      "url": "https://www.worldangklungday2025.com/"
+    }
+  ],
+  "contact": {
+    "email": "iqbal@bu.edu",
+    "emailText": "email me to reach out to me",
+    "linkedin": "https://www.linkedin.com/in/iqbalwijonarko/",
+    "linkedinText": "connect with me on LinkedIn"
+  }
+}
