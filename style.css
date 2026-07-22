@@ -463,6 +463,61 @@ mark.is-visible {
   font-weight: 500;
 }
 
+/* ===== Back-to-top button ===== */
+.to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+  color: #1d1d1f;
+  cursor: pointer;
+  /* hidden + non-interactive until scrolled down */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(0.9);
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.25s ease,
+              visibility 0.3s;
+}
+
+.to-top.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.to-top:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.to-top:active {
+  transform: scale(0.96);
+}
+
+.to-top:focus-visible {
+  outline: 2px solid #1a6fc4;
+  outline-offset: 3px;
+}
+
+.to-top svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 /* ===== Blog listing ===== */
 .container--narrow {
   max-width: 720px;
@@ -775,5 +830,16 @@ mark.is-visible {
   .project-card,
   .exp-card--link {
     transition: none;
+  }
+
+  .to-top {
+    transition: opacity 0.2s linear, visibility 0.2s;
+    transform: none;
+  }
+
+  .to-top.is-shown,
+  .to-top:hover,
+  .to-top:active {
+    transform: none;
   }
 }

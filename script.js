@@ -29,6 +29,103 @@ async function init() {
 
   setupReveal();
   setupPhotoTilt();
+  setupCountUp();
+  setupBackToTop();
+}
+
+/* Count-up: metric figures tick from 0 up to their value the first time the
+   row scrolls into view. Prefix/suffix ($, ×, %, B) are preserved — only the
+   number animates. Skipped for reduced-motion / no IntersectionObserver, in
+   which case the final values (already in the DOM) simply stay put. */
+function setupCountUp() {
+  const els = Array.prototype.slice.call(document.querySelectorAll(".metric-value"));
+  if (!els.length) return;
+
+  const items = els.map(function (el) {
+    const raw = el.textContent.trim();
+    const m = raw.match(/^([^\d]*)([\d.,]+)(.*)$/);
+    if (!m) return { el: el, animate: false };
+    const numStr = m[2].replace(/,/g, "");
+    const dot = numStr.indexOf(".");
+    return {
+      el: el,
+      animate: true,
+      prefix: m[1],
+      target: parseFloat(numStr),
+      decimals: dot === -1 ? 0 : numStr.length - dot - 1,
+      suffix: m[3],
+    };
+  });
+
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !("IntersectionObserver" in window)) return;
+
+  function fmt(item, val) {
+    const num = item.decimals
+      ? val.toFixed(item.decimals)
+      : Math.round(val).toLocaleString("en-US");
+    return item.prefix + num + item.suffix;
+  }
+
+  // Reset to zero so the final figure isn't flashed before it animates.
+  items.forEach(function (item) { if (item.animate) item.el.textContent = fmt(item, 0); });
+
+  const DURATION = 1400;
+  function run(item) {
+    let start = null;
+    function step(now) {
+      if (start === null) start = now;
+      const t = Math.min(1, (now - start) / DURATION);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic — quick then settle
+      item.el.textContent = fmt(item, item.target * eased);
+      if (t < 1) requestAnimationFrame(step);
+      else item.el.textContent = fmt(item, item.target);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const obs = new IntersectionObserver(function (entries, o) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      const item = items.filter(function (it) { return it.el === entry.target; })[0];
+      if (item && item.animate) run(item);
+      o.unobserve(entry.target);
+    });
+  }, { threshold: 0.6 });
+  items.forEach(function (item) { obs.observe(item.el); });
+}
+
+/* Floating "back to top" button — a minimal frosted circle (matches the nav's
+   glass treatment) that fades in once you've scrolled down from the top and
+   smooth-scrolls back up when clicked. */
+function setupBackToTop() {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "to-top";
+  btn.setAttribute("aria-label", "Back to top");
+  btn.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+      '<path d="M6 14l6-6 6 6" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg>";
+  document.body.appendChild(btn);
+
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const THRESHOLD = 400; // px scrolled from top before the button appears
+  let ticking = false;
+
+  function update() {
+    btn.classList.toggle("is-shown", window.scrollY > THRESHOLD);
+    ticking = false;
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { window.requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+
+  btn.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  });
 }
 
 /* Subtle 3D tilt: the headshot leans toward the cursor with a light-source
