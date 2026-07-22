@@ -132,3 +132,25 @@ git commit -m "Update content"
 git push
 ```
 GitHub Pages redeploys automatically within a minute or two. You can also edit `content.json` directly on github.com (pencil icon → commit) if you're not at your Mac.
+
+## SEO — ranking for "Iqbal Wijonarko"
+
+The site is built to rank for your name. What's already in place (in code):
+
+- **`index.html`** has a `Person` structured-data block (JSON-LD) that tells Google your site, LinkedIn, GitHub, and Instagram are all the same person — the strongest free signal for a name query. If any profile URL changes, edit the `sameAs` list in `index.html`.
+- **`robots.txt`** allows all crawlers and points to the sitemap.
+- **`sitemap.xml`** lists the homepage. If you ever add pages, add them here.
+- Canonical URL, name-forward `<title>`/description, Open Graph tags, mobile-friendly + HTTPS — all set.
+
+Two free steps only you can do (these are what actually get you indexed and ranked):
+
+1. **Google Search Console** — https://search.google.com/search-console
+   - Add property → **URL prefix** → `https://iqbalwijonarko.com`
+   - Verify via the **HTML tag** method (copy the `<meta name="google-site-verification" ...>` it gives you; add it in `index.html` right under the other meta tags, commit, push, then click Verify). Or verify by **DNS TXT record** at IONOS.
+   - Once verified: **Sitemaps** → submit `sitemap.xml`; then **URL Inspection** → paste `https://iqbalwijonarko.com` → **Request indexing**. This is the fastest way to get Google to notice a brand-new site.
+2. **Link your site from your profiles** (each is a free backlink + confirms the entity):
+   - LinkedIn → Edit profile → Contact info → Website → `https://iqbalwijonarko.com`
+   - GitHub → Profile settings → Website field
+   - Instagram → Edit profile → Website field
+
+Optional: repeat step 1 at **Bing Webmaster Tools** (free) to cover Bing/DuckDuckGo. Expect a few days to get indexed and up to ~2–3 months to settle at the top for your name.
