@@ -179,7 +179,7 @@ function setupReveal() {
 
   const revealEls = Array.prototype.slice.call(
     document.querySelectorAll(
-      "#site-header, .about-photo, .about-intro, .metric, .section-heading, .exp-card, .project-card, .contact-item"
+      "#site-header, .about-photo, .about-intro, .metrics-eyebrow, .metric, .section-heading, .exp-card, .project-card, .contact-item"
     )
   );
   revealEls.forEach(function (el) { el.classList.add("reveal"); });
@@ -290,6 +290,12 @@ function renderAbout(about) {
   }
   if (ctas.length) html += '<div class="about-ctas">' + ctas.join("") + "</div>";
   intro.innerHTML = html;
+
+  const metricsEyebrow = document.getElementById("metrics-eyebrow");
+  if (metricsEyebrow && about.metricsTitle) {
+    metricsEyebrow.textContent = about.metricsTitle;
+    metricsEyebrow.hidden = false;
+  }
 
   const metricsBox = document.getElementById("about-metrics");
   metricsBox.innerHTML = (about.metrics || [])

@@ -150,13 +150,25 @@ section {
   font-weight: 400;
 }
 
+/* Quiet label framing the metrics as results, not stray numbers. Matches the
+   "ABOUT" eyebrow treatment and carries the top spacing for the row. */
+.metrics-eyebrow {
+  margin-top: 64px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
 /* Exhibit-style proof row: the metrics that were buried in prose, now
    front and center — big figures, quiet labels, a thin rule above each. */
 .about-metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 32px;
-  margin-top: 64px;
+  margin-top: 0;
 }
 
 .metric {
@@ -371,10 +383,14 @@ mark.is-visible {
     margin-bottom: 28px;
   }
 
+  .metrics-eyebrow {
+    margin-top: 48px;
+  }
+
   .about-metrics {
     grid-template-columns: repeat(2, 1fr);
     gap: 28px 32px;
-    margin-top: 48px;
+    margin-top: 0;
   }
 }
 
