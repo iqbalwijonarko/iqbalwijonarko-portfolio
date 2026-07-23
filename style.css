@@ -703,6 +703,237 @@ mark.is-visible {
   color: #777;
 }
 
+/* ===== Bookshelf ===== */
+.page-intro {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #555;
+  max-width: 60ch;
+  margin: -12px 0 32px; /* pull up under the page title */
+}
+
+.book-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+/* Reuse the blog's filter pills; drop their bottom margin here. */
+.book-controls .post-filters {
+  margin-bottom: 0;
+}
+
+.book-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.book-sort-label {
+  font-size: 0.82rem;
+  color: #86868b;
+}
+
+.book-sort select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  padding: 7px 32px 7px 12px;
+  background: #fff url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.book-sort select:focus {
+  outline: none;
+  border-color: #1a6fc4;
+  box-shadow: 0 0 0 3px rgba(26, 111, 196, 0.12);
+}
+
+.book-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 18px;
+}
+
+/* Card shares the Experience/Project card treatment for a native feel. */
+.book-card {
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.10);
+}
+
+.book-cover {
+  aspect-ratio: 2 / 3;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0; /* keep the tile at its 2:3 height when the card is stretched */
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* No cover image: a quiet, low-saturation color panel (hue derived per book —
+   see hueFromString in bookshelf.js) with a subtle book icon, so it reads as an
+   intentional placeholder, not a missing image. The caption below is identical
+   to cover cards, so every card has the same white footer and aligned meta. */
+.book-cover--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--tile-h, 210), 30%, 94%);
+  color: hsl(var(--tile-h, 210), 34%, 68%);
+}
+
+.book-cover-icon {
+  width: 38%;
+  max-width: 68px;
+  height: auto;
+}
+
+.book-info {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative; /* anchor for the full-title popover */
+}
+
+.book-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: #1a1a1a;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em; /* always reserve two lines so author + meta line up */
+}
+
+/* Truncated titles become tappable/hoverable to reveal the full text. */
+.book-title.is-clamped {
+  cursor: pointer;
+}
+
+.book-title-tip {
+  display: none;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(100% - 6px); /* float just above the title */
+  z-index: 30;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  font-weight: 600;
+  font-size: 0.82rem;
+  line-height: 1.32;
+  color: #1a1a1a;
+}
+
+.book-title.is-clamped:hover + .book-title-tip,
+.book-title.is-clamped:focus-visible + .book-title-tip,
+.book-title.is-clamped.is-open + .book-title-tip {
+  display: block;
+}
+
+.book-author {
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: #6b6b6b;
+}
+
+.book-meta {
+  /* Pinned to the bottom of the card so the rating/year/badge row lines up
+     across every card in a row — regardless of title length or whether the
+     card has a cover image or a text placeholder. */
+  margin-top: auto;
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 1.6em; /* reserve a consistent row height (e.g. year-only cards) */
+}
+
+.book-rating {
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.star {
+  color: #d2d2d7;
+}
+
+.star--on {
+  color: #1d1d1f;
+}
+
+.book-year {
+  font-size: 0.72rem;
+  color: #86868b;
+}
+
+.book-unrated {
+  font-size: 0.72rem;
+  color: #b0b0b0;
+}
+
+.book-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #4a5a68;
+  background: #eef2f6;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.book-empty {
+  list-style: none;
+  color: #777;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .book-controls {
+    gap: 16px;
+  }
+}
+
 /* ===== Single post ===== */
 .post-back {
   display: inline-block;

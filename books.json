@@ -1,0 +1,324 @@
+{
+  "books": [
+    {
+      "title": "Crucial Conversations: Tools for Talking When Stakes are High",
+      "author": "Kerry Patterson",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 299,
+      "cover": null
+    },
+    {
+      "title": "Case in Point 12th Edition: Complete Case Interview Preparation",
+      "author": "Marc Cosentino",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 235,
+      "cover": null
+    },
+    {
+      "title": "Shoe Dog",
+      "author": "Phil Knight",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 402,
+      "cover": "assets/books/shoe-dog.jpg"
+    },
+    {
+      "title": "Titan: The Life of John D. Rockefeller, Sr.",
+      "author": "Ron Chernow",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 834,
+      "cover": null
+    },
+    {
+      "title": "Case in Point 5: Complete Case Interview Preparation",
+      "author": "Marc P. Cosentino",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 186,
+      "cover": "assets/books/case-in-point-5-complete-case-interview-preparatio.jpg"
+    },
+    {
+      "title": "Steve Jobs",
+      "author": "Walter Isaacson",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 630,
+      "cover": "assets/books/steve-jobs.jpg"
+    },
+    {
+      "title": "Company Of One: Why Staying Small Is the Next Big Thing for Business",
+      "author": "Paul Jarvis",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 272,
+      "cover": "assets/books/company-of-one-why-staying-small-is-the-next-big-t.jpg"
+    },
+    {
+      "title": "Your Next Five Moves: Master the Art of Business Strategy",
+      "author": "Patrick Bet-David",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": 275,
+      "cover": null
+    },
+    {
+      "title": "Decode and Conquer: Answers to Product Management Interviews",
+      "author": "Lewis C. Lin",
+      "rating": 0,
+      "shelf": "currently-reading",
+      "dateRead": null,
+      "year": null,
+      "pages": null,
+      "cover": null
+    },
+    {
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "rating": 0,
+      "shelf": "read",
+      "dateRead": "2025-10-13",
+      "year": 2025,
+      "pages": 512,
+      "cover": null
+    },
+    {
+      "title": "The McKinsey Way",
+      "author": "Ethan M. Rasiel",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2024-06-19",
+      "year": 2024,
+      "pages": 187,
+      "cover": "assets/books/the-mckinsey-way.jpg"
+    },
+    {
+      "title": "Inspired: How to Create Tech Products Customers Love (Silicon Valley Product Group)",
+      "author": "Marty Cagan",
+      "rating": 3,
+      "shelf": "read",
+      "dateRead": "2024-03-23",
+      "year": 2024,
+      "pages": 349,
+      "cover": null
+    },
+    {
+      "title": "I Will Teach You to Be Rich: No Guilt. No Excuses. Just a 6-Week Program That Works (Second Edition)",
+      "author": "Ramit Sethi",
+      "rating": 3,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 510,
+      "cover": null
+    },
+    {
+      "title": "Elon Musk",
+      "author": "Walter Isaacson",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 688,
+      "cover": "assets/books/elon-musk.jpg"
+    },
+    {
+      "title": "Sam Walton, Made in America: My Story",
+      "author": "Sam Walton",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 346,
+      "cover": "assets/books/sam-walton-made-in-america-my-story.jpg"
+    },
+    {
+      "title": "The Everything Store: Jeff Bezos and the Age of Amazon",
+      "author": "Brad Stone",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 384,
+      "cover": "assets/books/the-everything-store-jeff-bezos-and-the-age-of-ama.jpg"
+    },
+    {
+      "title": "Chairul Tanjung Si Anak Singkong",
+      "author": "Tjahja Gunawan Diredja",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 400,
+      "cover": null
+    },
+    {
+      "title": "Muhammad Al-Fatih 1453",
+      "author": "Felix Y. Siauw",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 320,
+      "cover": null
+    },
+    {
+      "title": "Deep Work: Rules for Focused Success in a Distracted World",
+      "author": "Cal Newport",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 286,
+      "cover": null
+    },
+    {
+      "title": "The Willpower Instinct: How Self-Control Works, Why It Matters, and What You Can Do To Get More of It",
+      "author": "Kelly McGonigal",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 272,
+      "cover": null
+    },
+    {
+      "title": "Think and Grow Rich",
+      "author": "Napoleon Hill",
+      "rating": 3,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 233,
+      "cover": null
+    },
+    {
+      "title": "The Psychology of Money: Timeless Lessons on Wealth, Greed, and Happiness",
+      "author": "Morgan Housel",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 242,
+      "cover": null
+    },
+    {
+      "title": "The 7 Habits of Highly Effective People: Powerful Lessons in Personal Change",
+      "author": "Stephen R. Covey",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 372,
+      "cover": "assets/books/the-7-habits-of-highly-effective-people-powerful-l.jpg"
+    },
+    {
+      "title": "The Intelligent Investor",
+      "author": "Benjamin Graham",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 623,
+      "cover": "assets/books/the-intelligent-investor.jpg"
+    },
+    {
+      "title": "Think Again: The Power of Knowing What You Don't Know",
+      "author": "Adam M. Grant",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 307,
+      "cover": "assets/books/think-again-the-power-of-knowing-what-you-don-t-kn.jpg"
+    },
+    {
+      "title": "Rich Dad Poor Dad: What the Rich Teach Their Kids About Money—That the Poor and Middle Class Do Not!",
+      "author": "Robert T. Kiyosaki",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 195,
+      "cover": "assets/books/rich-dad-poor-dad-what-the-rich-teach-their-kids-a.jpg"
+    },
+    {
+      "title": "Start with Why: How Great Leaders Inspire Everyone to Take Action",
+      "author": "Simon Sinek",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 256,
+      "cover": "assets/books/start-with-why-how-great-leaders-inspire-everyone-.jpg"
+    },
+    {
+      "title": "How to Win Friends & Influence People",
+      "author": "Dale Carnegie",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 288,
+      "cover": null
+    },
+    {
+      "title": "The Lean Startup",
+      "author": "Eric Ries",
+      "rating": 4,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 299,
+      "cover": "assets/books/the-lean-startup.jpg"
+    },
+    {
+      "title": "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones",
+      "author": "James Clear",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 319,
+      "cover": null
+    },
+    {
+      "title": "The Subtle Art of Not Giving a F*ck: A Counterintuitive Approach to Living a Good Life",
+      "author": "Mark Manson",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 212,
+      "cover": null
+    },
+    {
+      "title": "The Alchemist",
+      "author": "Paulo Coelho",
+      "rating": 5,
+      "shelf": "read",
+      "dateRead": "2023-12-22",
+      "year": 2023,
+      "pages": 182,
+      "cover": "assets/books/the-alchemist.jpg"
+    }
+  ]
+}

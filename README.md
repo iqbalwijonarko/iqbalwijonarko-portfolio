@@ -22,7 +22,7 @@ Digital Transformation Specialist &nbsp;·&nbsp; Questrom (Boston University) Mi
 
 This is the source for my personal website and blog at **[iqbalwijonarko.com](https://iqbalwijonarko.com)**.
 
-A fully static site — plain HTML, CSS, and vanilla JavaScript. No frameworks, no build step, no dependencies. All content lives in two JSON files, so updating it never means touching code. Hosted free on GitHub Pages, with the domain at IONOS.
+A fully static site — plain HTML, CSS, and vanilla JavaScript. No frameworks, no build step, no dependencies. All content lives in JSON files (`content.json`, `posts.json`, `books.json`), so updating it never means touching code. Hosted free on GitHub Pages, with the domain at IONOS. Everything is flat files, so it can equally be uploaded to IONOS webspace over SFTP.
 
 <br>
 
@@ -84,6 +84,33 @@ Every post is one entry in **`posts.json`**. Posts sort newest-first automatical
 - `image` — thumbnail on the listing and hero on the post. Put images in `assets/blog/`. Optional.
 
 After adding a post, add its URL to `sitemap.xml` so Google finds it.
+
+</details>
+
+<details>
+<summary><strong>&nbsp;Updating the Bookshelf</strong></summary>
+
+<br>
+
+The Bookshelf page (`bookshelf.html`) lists what I've read. Goodreads shut down its public API in 2020, so there's no live pull — instead the list is generated once from a Goodreads CSV export and shipped as a static `books.json`. The page fetches only that JSON; nothing hits Goodreads at page load.
+
+**1. Export from Goodreads** — go to **Goodreads → Account → My Books → Import/Export → Export Library**. Download the CSV and save it in the project root as `goodreads_library_export.csv`. (This file is git-ignored; only the generated `books.json` is committed/deployed.)
+
+**2. Regenerate `books.json`** — run the local build script:
+
+```
+node build-books.js
+```
+
+It reads the CSV, keeps only the fields the page needs (title, author, rating, shelf, date/year read, pages), fetches book covers (see below), and writes `books.json`. If no CSV is present it writes a small **sample** `books.json` instead, so the page always renders. `build-books.js` is a local tool — it is never loaded by the browser.
+
+**3. Covers are automatic (fetched at build time, not at page load)** — the Goodreads export has no cover URLs, so the build script looks each book up by ISBN in the free [Open Library Covers API](https://openlibrary.org/dev/docs/api/covers) and downloads the image **once** into `assets/books/`. The site then serves those as **local static files**, lazy-loaded with fixed dimensions — so there are no third-party requests when a visitor loads the page, and no hit to performance, SEO, or hosting cost (the covers total only a few hundred KB). Books with no ISBN, or with no cover on Open Library, keep a tasteful text placeholder tile automatically.
+
+- Re-running is safe: already-downloaded covers are reused (Open Library isn't re-hit).
+- Offline? Run `node build-books.js --no-covers` to skip the network; any covers already on disk are still linked.
+- To override a cover by hand, drop your own image in `assets/books/` and set that book's `"cover"` path in `books.json`. `books.sample.json` is a checked-in reference of the schema.
+
+**Deploying** — `bookshelf.html`, `bookshelf.js`, `books.json`, and the `assets/books/` covers are flat files like everything else: commit and push (GitHub Pages) or upload them over SFTP to IONOS, the same way you deploy the rest of the site. `build-books.js` and the raw CSV stay local and are not uploaded.
 
 </details>
 

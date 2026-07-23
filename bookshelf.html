@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Bookshelf — layout rationale (adjust freely)
+  ------------------------------------------------------------------
+  A responsive grid of quiet cards, reusing the site's existing card
+  language (same border, 10px radius, soft shadow, hover-lift as the
+  Experience/Project cards) so the page feels native, not bolted on.
+
+  Goodreads exports carry no reliable cover URLs, so each card leads
+  with a text placeholder tile — the title on a muted, deterministically
+  colored panel (low saturation, Apple-restrained). If you later add a
+  "cover" path to a book in books.json, the image replaces the tile
+  (lazy-loaded, fixed size to avoid layout shift); title/author/rating
+  still render below it.
+
+  Per card: title, author, star rating (filled/empty markers, not raw
+  numbers), and year read. Shelf shows as a subtle tag. Two vanilla
+  controls earn their place at ~30 books: a shelf filter and a sort
+  (recently read / rating / title). No libraries, no runtime API calls —
+  the page only fetches the static books.json, generated locally by
+  build-books.js.
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookshelf | Iqbal Wijonarko</title>
+  <meta name="description" content="Books Iqbal Wijonarko has read and is reading — business, strategy, product, and the people who built things, with personal ratings.">
+  <meta name="author" content="Iqbal Wijonarko">
+  <link rel="canonical" href="https://iqbalwijonarko.com/bookshelf.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://iqbalwijonarko.com/bookshelf.html">
+  <meta property="og:title" content="Bookshelf | Iqbal Wijonarko">
+  <meta property="og:description" content="Books Iqbal Wijonarko has read and is reading — business, strategy, product, and the people who built things.">
+  <meta property="og:image" content="https://iqbalwijonarko.com/assets/iqbal_new.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Bookshelf | Iqbal Wijonarko">
+  <meta name="twitter:image" content="https://iqbalwijonarko.com/assets/iqbal_new.png">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html" aria-label="Iqbal Wijonarko — home">IW</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blog</a>
+        <a href="bookshelf.html" class="active" aria-current="page">Bookshelf</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">Bookshelf</h1>
+    <p class="page-intro">What I've been reading, mostly business, strategy, product, and the people who built things. Ratings are my own, and the shelf updates whenever I export from my <a href="https://www.goodreads.com/user/show/172769224-iqbal-wijonarko" target="_blank" rel="noopener noreferrer">Goodreads profile</a>, which you're welcome to follow.</p>
+
+    <div class="book-controls">
+      <div class="post-filters" id="book-filters" role="group" aria-label="Filter by shelf"></div>
+      <label class="book-sort">
+        <span class="book-sort-label">Sort</span>
+        <select id="book-sort" aria-label="Sort books">
+          <option value="recent">Recently read</option>
+          <option value="rating">Rating</option>
+          <option value="title">Title (A–Z)</option>
+        </select>
+      </label>
+    </div>
+
+    <ul class="book-grid" id="book-list" aria-label="Books"></ul>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2026 Iqbal Wijonarko</span>
+      <span class="footer-right" aria-hidden="true"></span>
+    </div>
+  </footer>
+
+  <script src="bookshelf.js"></script>
+</body>
+</html>

@@ -13,6 +13,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://iqbalwijonarko.com/bookshelf.html</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://iqbalwijonarko.com/post.html?slug=my-first-post</loc>
     <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
