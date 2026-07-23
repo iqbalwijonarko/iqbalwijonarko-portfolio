@@ -325,7 +325,7 @@ function renderAbout(about) {
         '<div class="metric-value run-hero-value">' + escapeHTML(rh.value) + "</div>" +
         '<div class="metric-label">' + escapeHTML(rh.caption) + "</div>" +
       "</div>" +
-      '<div class="run-aside">' + stats + "</div>";
+      stats;
   }
 }
 

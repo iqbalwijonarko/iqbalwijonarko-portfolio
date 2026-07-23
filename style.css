@@ -49,7 +49,7 @@ a:hover {
 
 /* ===== Sections ===== */
 section {
-  margin-bottom: 72px;
+  margin-bottom: 36px;
 }
 
 .section-heading {
@@ -175,11 +175,14 @@ section {
    number (the half marathon) with two lighter supporting stats. Reuses the
    numeral/rule/caption language of .about-metrics so it aligns, but the
    asymmetry + lighter supporting rules mark it as its own, secondary group. */
+/* Three even columns spanning the full width (like the work row) so the group
+   isn't left-heavy with empty space on the right. Hero stays dominant via its
+   larger numeral. */
 .run {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 28px 56px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px 40px;
+  align-items: start;
 }
 
 /* Label + a short intro line that names the hobby (so the numbers read as
@@ -187,6 +190,7 @@ section {
    the intro — a distinct line treatment vs the work row's per-item top rules,
    and the numbers below sit rule-free. Scoped so the work label is unaffected. */
 #run-eyebrow {
+  margin-top: 44px; /* tighter gap from the work section than the default 64px */
   margin-bottom: 8px;
 }
 
@@ -197,7 +201,8 @@ section {
   font-size: 1.05rem;
   line-height: 1.55;
   color: #555;
-  max-width: 56ch;
+  /* full-width so the ruler spans the whole row (over all three stats),
+     while the short sentence simply stays left-aligned within it */
 }
 
 .run-hero .metric-label {
@@ -206,21 +211,19 @@ section {
 
 /* Supporting stats (4, 100%): smaller numerals so they read as secondary to
    the hero and to the work row. */
-.run-aside {
-  display: flex;
-  gap: 44px;
-}
-
 .run-stat .run-stat-value {
   font-size: 1.6rem;
 }
 
 @media (max-width: 600px) {
+  /* Hero spans the top; the two stats split the row below, so the right side
+     stays filled on mobile too. */
   .run {
-    gap: 24px 40px;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 28px;
   }
-  .run-aside {
-    gap: 32px;
+  .run-hero {
+    grid-column: 1 / -1;
   }
 }
 
