@@ -16,6 +16,16 @@
       { "value": "55%", "label": "Growth in active users" },
       { "value": "9", "label": "Departments in the AI transformation I lead" }
     ],
+    "runTitle": "Off the clock",
+    "runSubtitle": "Running is how I spend my free time.",
+    "runHighlight": {
+      "value": "13.1",
+      "caption": "Miles at my farthest, my first half marathon",
+      "stats": [
+        { "value": "4", "label": "Races finished" },
+        { "value": "100%", "label": "Finish rate" }
+      ]
+    },
     "cta": { "text": "Let's talk strategy", "href": "https://www.linkedin.com/in/iqbalwijonarko/" },
     "ctaSecondary": { "text": "Follow my reading on Goodreads", "href": "https://www.goodreads.com/user/show/172769224-iqbal-wijonarko" }
   },

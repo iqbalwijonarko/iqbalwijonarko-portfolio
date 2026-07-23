@@ -171,6 +171,59 @@ section {
   margin-top: 0;
 }
 
+/* "On the run" — a featured achievement, not a second stats grid. One hero
+   number (the half marathon) with two lighter supporting stats. Reuses the
+   numeral/rule/caption language of .about-metrics so it aligns, but the
+   asymmetry + lighter supporting rules mark it as its own, secondary group. */
+.run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 28px 56px;
+}
+
+/* Label + a short intro line that names the hobby (so the numbers read as
+   running stats). The whole header block is bounded by a single hairline under
+   the intro — a distinct line treatment vs the work row's per-item top rules,
+   and the numbers below sit rule-free. Scoped so the work label is unaffected. */
+#run-eyebrow {
+  margin-bottom: 8px;
+}
+
+.run-sub {
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #555;
+  max-width: 56ch;
+}
+
+.run-hero .metric-label {
+  max-width: 24ch;
+}
+
+/* Supporting stats (4, 100%): smaller numerals so they read as secondary to
+   the hero and to the work row. */
+.run-aside {
+  display: flex;
+  gap: 44px;
+}
+
+.run-stat .run-stat-value {
+  font-size: 1.6rem;
+}
+
+@media (max-width: 600px) {
+  .run {
+    gap: 24px 40px;
+  }
+  .run-aside {
+    gap: 32px;
+  }
+}
+
 .metric {
   border-top: 2px solid #1a1a1a;
   padding-top: 16px;

@@ -179,7 +179,7 @@ function setupReveal() {
 
   const revealEls = Array.prototype.slice.call(
     document.querySelectorAll(
-      "#site-header, .about-photo, .about-intro, .metrics-eyebrow, .metric, .section-heading, .exp-card, .project-card, .contact-item"
+      "#site-header, .about-photo, .about-intro, .metrics-eyebrow, .run-sub, .metric, .run-hero, .run-stat, .section-heading, .exp-card, .project-card, .contact-item"
     )
   );
   revealEls.forEach(function (el) { el.classList.add("reveal"); });
@@ -298,16 +298,46 @@ function renderAbout(about) {
   }
 
   const metricsBox = document.getElementById("about-metrics");
-  metricsBox.innerHTML = (about.metrics || [])
-    .map(function (m) {
+  metricsBox.innerHTML = (about.metrics || []).map(metricCard).join("");
+
+  // "On the run" — a featured achievement (hero number + lighter supporting
+  // stats). Values are in the static HTML (no-JS/SEO); re-render from
+  // content.json so they stay editable. The shared count-up animates them.
+  const runEyebrow = document.getElementById("run-eyebrow");
+  if (runEyebrow && about.runTitle) runEyebrow.textContent = about.runTitle;
+
+  const runSub = document.getElementById("run-sub");
+  if (runSub && about.runSubtitle) runSub.textContent = about.runSubtitle;
+
+  const runBox = document.getElementById("run");
+  const rh = about.runHighlight;
+  if (runBox && rh) {
+    const stats = (rh.stats || []).map(function (s) {
       return (
-        '<div class="metric">' +
-          '<div class="metric-value">' + escapeHTML(m.value) + "</div>" +
-          '<div class="metric-label">' + escapeHTML(m.label) + "</div>" +
+        '<div class="run-stat">' +
+          '<div class="metric-value run-stat-value">' + escapeHTML(s.value) + "</div>" +
+          '<div class="metric-label">' + escapeHTML(s.label) + "</div>" +
         "</div>"
       );
-    })
-    .join("");
+    }).join("");
+    runBox.innerHTML =
+      '<div class="run-hero">' +
+        '<div class="metric-value run-hero-value">' + escapeHTML(rh.value) + "</div>" +
+        '<div class="metric-label">' + escapeHTML(rh.caption) + "</div>" +
+      "</div>" +
+      '<div class="run-aside">' + stats + "</div>";
+  }
+}
+
+/* Shared markup for one metric (numeral + caption), used by both the work
+   "By the numbers" row and the "On the run" row. */
+function metricCard(m) {
+  return (
+    '<div class="metric">' +
+      '<div class="metric-value">' + escapeHTML(m.value) + "</div>" +
+      '<div class="metric-label">' + escapeHTML(m.label) + "</div>" +
+    "</div>"
+  );
 }
 
 function renderCards(gridId, items, toHTML) {
