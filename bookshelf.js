@@ -12,20 +12,8 @@ let ALL_BOOKS = [];
 let activeShelf = "all";
 let sortMode = "recent";
 
-async function initBookshelf() {
-  try {
-    const res = await fetch("books.json");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    ALL_BOOKS = data.books || [];
-  } catch (err) {
-    showBooksError();
-    return;
-  }
-
-  renderShelfFilters();
-  renderBooks();
-
+function initBookshelf() {
+  // One-time listeners — they survive reloads/retries of the book list.
   const sort = document.getElementById("book-sort");
   sort.addEventListener("change", function () {
     sortMode = sort.value;
@@ -39,6 +27,52 @@ async function initBookshelf() {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") closeAllTips(null);
   });
+
+  loadBooks();
+}
+
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+/* Fetch books.json with a per-attempt timeout and a few retries, so a slow or
+   spotty connection (e.g. weak mobile signal) recovers on its own instead of
+   dropping straight to the error state. */
+async function fetchBooksWithRetry(attempts) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const controller = ("AbortController" in window) ? new AbortController() : null;
+      const timer = controller ? setTimeout(function () { controller.abort(); }, 9000) : null;
+      const res = await fetch("books.json", controller ? { signal: controller.signal } : undefined);
+      if (timer) clearTimeout(timer);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      return data.books || [];
+    } catch (e) {
+      lastErr = e;
+      if (i < attempts - 1) await sleep(700 * (i + 1)); // 0.7s, then 1.4s backoff
+    }
+  }
+  throw lastErr;
+}
+
+async function loadBooks() {
+  showBooksLoading();
+  let books;
+  try {
+    books = await fetchBooksWithRetry(3);
+  } catch (err) {
+    showBooksError();
+    return;
+  }
+  ALL_BOOKS = books;
+  setControlsVisible(true);
+  renderShelfFilters();
+  renderBooks();
+}
+
+function setControlsVisible(show) {
+  const c = document.querySelector(".book-controls");
+  if (c) c.hidden = !show;
 }
 
 /* ---------- helpers ---------- */
@@ -156,9 +190,30 @@ function renderBooks() {
     return;
   }
 
+  list.removeAttribute("aria-busy");
   list.innerHTML = books.map(bookCard).join("");
   revealBooks();
   setupTitleTips();
+}
+
+/* Calm skeleton placeholders while loading — keeps the layout stable and reads
+   better than a spinner, especially when a retry is in flight. */
+function showBooksLoading() {
+  setControlsVisible(false);
+  const list = document.getElementById("book-list");
+  list.setAttribute("aria-busy", "true");
+  let html = "";
+  for (let i = 0; i < 10; i++) {
+    html +=
+      '<li class="book-card book-skeleton" aria-hidden="true">' +
+        '<div class="book-cover book-skeleton-cover"></div>' +
+        '<div class="book-info">' +
+          '<span class="skeleton-line skeleton-line--title"></span>' +
+          '<span class="skeleton-line skeleton-line--sub"></span>' +
+        "</div>" +
+      "</li>";
+  }
+  list.innerHTML = html;
 }
 
 function closeAllTips(except) {
@@ -305,12 +360,24 @@ function setupBackToTop() {
   });
 }
 
+/* Friendly, on-brand error state with a one-tap retry — shown only after the
+   retries above are exhausted. Tapping "Try again" re-runs the whole load. */
 function showBooksError() {
-  const isFile = window.location.protocol === "file:";
-  document.getElementById("book-list").innerHTML =
-    '<li class="load-error"><strong>Books could not be loaded.</strong><br>' +
-    (isFile
-      ? "Preview with a local server: run <code>python3 -m http.server 8000</code> and open <code>http://localhost:8000/bookshelf.html</code>."
-      : "Run <code>node build-books.js</code> to generate <code>books.json</code>, and check it is valid JSON.") +
+  setControlsVisible(false);
+  const list = document.getElementById("book-list");
+  list.removeAttribute("aria-busy");
+  list.innerHTML =
+    '<li class="books-notice">' +
+      '<div class="books-notice-icon" aria-hidden="true">' +
+        '<svg viewBox="0 0 24 24" fill="none">' +
+          '<path d="M3 5.6c0-.5.4-.9.9-1 2-.4 4.9-.2 8.1 1.5 3.2-1.7 6.1-1.9 8.1-1.5.5.1.9.5.9 1V18c0 .6-.5 1.1-1.2 1-1.9-.3-4.4-.3-6.8 1-2.4-1.3-4.9-1.3-6.8-1C3.5 19.1 3 18.6 3 18V5.6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
+          '<path d="M12 6.6V19" stroke="currentColor" stroke-width="1.5"/>' +
+        "</svg>" +
+      "</div>" +
+      "<h2 class=\"books-notice-title\">Couldn’t load the bookshelf</h2>" +
+      '<p class="books-notice-text">This can happen on a slow or spotty connection. Check your network and try again.</p>' +
+      '<button type="button" class="books-retry">Try again</button>' +
     "</li>";
+  const btn = list.querySelector(".books-retry");
+  if (btn) btn.addEventListener("click", function () { loadBooks(); });
 }
