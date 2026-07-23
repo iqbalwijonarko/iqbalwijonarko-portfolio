@@ -108,13 +108,28 @@
         </div>
         <p class="metrics-eyebrow" id="metrics-eyebrow" hidden></p>
         <div class="about-metrics" id="about-metrics"></div>
+      </section>
 
-        <!-- "On the run" — a featured achievement (not a second stats grid): one
-             hero number (the half marathon) plus two lighter supporting stats.
-             Reuses the numeral/rule/caption language of the metrics row so it
-             aligns, but the asymmetry marks it as its own, lighter group. Values
-             are static here (no-JS/SEO); script.js re-renders from content.json,
-             and the shared count-up animates them. -->
+      <section id="experience" aria-label="Experience">
+        <h2 class="section-heading">Experience</h2>
+        <div class="card-grid" id="experience-grid"></div>
+      </section>
+
+      <section id="education" aria-label="Education">
+        <h2 class="section-heading">Education</h2>
+        <div class="card-grid" id="education-grid"></div>
+      </section>
+
+      <section id="projects" aria-label="Past Projects">
+        <h2 class="section-heading">Past Projects</h2>
+        <div class="card-grid" id="projects-grid"></div>
+      </section>
+
+      <!-- "Off the clock" — a personal closer after the professional sections:
+           the running hobby as a featured achievement (hero + two supporting
+           stats). Values are static here (no-JS/SEO); script.js re-renders them
+           from content.json and the shared count-up animates them. -->
+      <section id="running" aria-label="Off the clock">
         <p class="metrics-eyebrow" id="run-eyebrow">Off the clock</p>
         <p class="run-sub" id="run-sub">Running is how I spend my free time.</p>
         <div class="run" id="run">
@@ -131,21 +146,6 @@
             <div class="metric-label">Finish rate</div>
           </div>
         </div>
-      </section>
-
-      <section id="experience" aria-label="Experience">
-        <h2 class="section-heading">Experience</h2>
-        <div class="card-grid" id="experience-grid"></div>
-      </section>
-
-      <section id="education" aria-label="Education">
-        <h2 class="section-heading">Education</h2>
-        <div class="card-grid" id="education-grid"></div>
-      </section>
-
-      <section id="projects" aria-label="Past Projects">
-        <h2 class="section-heading">Past Projects</h2>
-        <div class="card-grid" id="projects-grid"></div>
       </section>
 
       <section id="contact" aria-label="Contact">
