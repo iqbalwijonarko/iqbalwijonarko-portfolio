@@ -113,11 +113,19 @@ section {
   max-width: 46ch;
 }
 
+/* Primary + secondary calls to action, side by side (wrap on narrow widths). */
+.about-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 26px;
+  margin-top: 28px;
+}
+
 .about-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 28px;
   font-size: 0.98rem;
   font-weight: 600;
   color: #1a1a1a;
@@ -128,6 +136,14 @@ section {
 .about-cta:hover {
   color: #1a6fc4;
   gap: 12px;
+}
+
+/* Quieter secondary action (e.g. the Goodreads follow) — subordinate to the
+   primary CTA, in the muted gray used elsewhere. */
+.about-cta--secondary {
+  font-weight: 500;
+  font-size: 0.92rem;
+  color: #86868b;
 }
 
 .about-cta-arrow {

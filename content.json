@@ -15,7 +15,8 @@
       { "value": "55%", "label": "Growth in active users" },
       { "value": "9", "label": "Departments in the AI transformation I lead" }
     ],
-    "cta": { "text": "Let's talk strategy", "href": "https://www.linkedin.com/in/iqbalwijonarko/" }
+    "cta": { "text": "Let's talk strategy", "href": "https://www.linkedin.com/in/iqbalwijonarko/" },
+    "ctaSecondary": { "text": "Follow my reading on Goodreads", "href": "https://www.goodreads.com/user/show/172769224-iqbal-wijonarko" }
   },
   "experience": [
     {

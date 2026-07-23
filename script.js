@@ -258,6 +258,19 @@ function renderHeader(site) {
   document.title = site.title + " | From Technology to Strategy";
 }
 
+/* Build one About call-to-action link. External (http) links open in a new
+   tab; mailto / in-page anchors stay in place. */
+function ctaLink(cta, cls) {
+  const external = /^https?:/i.test(cta.href);
+  const target = external ? ' target="_blank" rel="noopener noreferrer"' : "";
+  return (
+    '<a class="' + cls + '" href="' + escapeHTML(cta.href) + '"' + target + ">" +
+      escapeHTML(cta.text) +
+      '<span class="about-cta-arrow" aria-hidden="true">→</span>' +
+    "</a>"
+  );
+}
+
 function renderAbout(about) {
   const photoBox = document.querySelector(".about-photo");
   const img = document.createElement("img");
@@ -270,16 +283,12 @@ function renderAbout(about) {
   let html = '<p class="about-eyebrow">' + escapeHTML(about.eyebrow) + "</p>";
   html += '<h2 class="about-headline">' + escapeHTML(about.headline) + "</h2>";
   html += '<p class="about-lead">' + escapeHTML(about.lead) + "</p>";
-  if (about.cta && about.cta.href) {
-    // External (http) links open in a new tab; mailto/anchor links stay in-page.
-    const external = /^https?:/i.test(about.cta.href);
-    const target = external ? ' target="_blank" rel="noopener noreferrer"' : "";
-    html +=
-      '<a class="about-cta" href="' + escapeHTML(about.cta.href) + '"' + target + ">" +
-        escapeHTML(about.cta.text) +
-        '<span class="about-cta-arrow" aria-hidden="true">→</span>' +
-      "</a>";
+  const ctas = [];
+  if (about.cta && about.cta.href) ctas.push(ctaLink(about.cta, "about-cta"));
+  if (about.ctaSecondary && about.ctaSecondary.href) {
+    ctas.push(ctaLink(about.ctaSecondary, "about-cta about-cta--secondary"));
   }
+  if (ctas.length) html += '<div class="about-ctas">' + ctas.join("") + "</div>";
   intro.innerHTML = html;
 
   const metricsBox = document.getElementById("about-metrics");
