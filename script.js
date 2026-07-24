@@ -31,6 +31,55 @@ async function init() {
   setupPhotoTilt();
   setupCountUp();
   setupBackToTop();
+  setupCarouselControls();
+}
+
+/* Apple-style prev/next buttons under each mobile carousel. Adds a control pair
+   below every .card-grid; scrolls one card per click and disables at each end.
+   Hidden on desktop via CSS (the grid isn't a scroller there). */
+function setupCarouselControls() {
+  const CHEVRON_LEFT =
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" ' +
+    'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const CHEVRON_RIGHT =
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 6l6 6-6 6" ' +
+    'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  document.querySelectorAll(".card-grid").forEach(function (grid) {
+    const nav = document.createElement("div");
+    nav.className = "carousel-nav";
+    nav.setAttribute("aria-hidden", "true"); // swiping is the primary control; buttons are an aid
+    nav.innerHTML =
+      '<button type="button" class="carousel-btn" data-dir="prev" aria-label="Previous">' + CHEVRON_LEFT + "</button>" +
+      '<button type="button" class="carousel-btn" data-dir="next" aria-label="Next">' + CHEVRON_RIGHT + "</button>";
+    grid.insertAdjacentElement("afterend", nav);
+
+    const prev = nav.querySelector('[data-dir="prev"]');
+    const next = nav.querySelector('[data-dir="next"]');
+
+    function step() {
+      const card = grid.firstElementChild;
+      const gap = parseFloat(getComputedStyle(grid).columnGap) || 14;
+      return card ? card.getBoundingClientRect().width + gap : grid.clientWidth * 0.8;
+    }
+
+    function update() {
+      const max = grid.scrollWidth - grid.clientWidth;
+      prev.disabled = grid.scrollLeft <= 2;
+      next.disabled = grid.scrollLeft >= max - 2;
+    }
+
+    prev.addEventListener("click", function () { grid.scrollBy({ left: -step(), behavior: "smooth" }); });
+    next.addEventListener("click", function () { grid.scrollBy({ left: step(), behavior: "smooth" }); });
+
+    let ticking = false;
+    grid.addEventListener("scroll", function () {
+      if (!ticking) { window.requestAnimationFrame(function () { update(); ticking = false; }); ticking = true; }
+    }, { passive: true });
+
+    window.addEventListener("resize", update);
+    update();
+  });
 }
 
 /* Count-up: metric figures tick from 0 up to their value the first time the

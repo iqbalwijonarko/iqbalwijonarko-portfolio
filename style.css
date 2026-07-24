@@ -271,6 +271,46 @@ mark.is-visible {
   gap: 24px;
 }
 
+/* Carousel prev/next controls — only shown on mobile (see the ≤600px block),
+   where the grids become swipeable carousels. Apple-style circular buttons. */
+.carousel-nav {
+  display: none;
+}
+
+.carousel-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.carousel-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.carousel-btn:active {
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.carousel-btn:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.carousel-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Experience & Education cards */
 .exp-card {
   border: 1px solid #e3e3e3;
@@ -476,6 +516,14 @@ mark.is-visible {
   .card-grid > * {
     flex: 0 0 80%;
     scroll-snap-align: start;
+  }
+
+  /* Show the prev/next controls, right-aligned under the carousel */
+  .carousel-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
   }
 
   .container {
