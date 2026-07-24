@@ -451,8 +451,31 @@ mark.is-visible {
 }
 
 @media (max-width: 600px) {
+  /* Experience / Education / Projects become an Apple-style horizontal snap
+     carousel on phones: full-bleed edge-to-edge, swipeable, one card in focus
+     per snap with the next card peeking. No scrollbar; the peek is the cue. */
   .card-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    grid-template-columns: none;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* bleed to the screen edges, then re-pad so the first card lines up under
+       the section heading and there's room for card shadow + hover lift */
+    margin: 0 -26px;
+    padding: 6px 26px 16px;
+    scroll-padding-left: 26px;
+  }
+
+  .card-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card-grid > * {
+    flex: 0 0 80%;
+    scroll-snap-align: start;
   }
 
   .container {
