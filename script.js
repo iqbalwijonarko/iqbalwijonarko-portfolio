@@ -40,10 +40,10 @@ async function init() {
 function setupCarouselControls() {
   const CHEVRON_LEFT =
     '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" ' +
-    'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const CHEVRON_RIGHT =
     '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 6l6 6-6 6" ' +
-    'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   document.querySelectorAll(".card-grid").forEach(function (grid) {
     const nav = document.createElement("div");
@@ -69,8 +69,17 @@ function setupCarouselControls() {
       next.disabled = grid.scrollLeft >= max - 2;
     }
 
-    prev.addEventListener("click", function () { grid.scrollBy({ left: -step(), behavior: "smooth" }); });
-    next.addEventListener("click", function () { grid.scrollBy({ left: step(), behavior: "smooth" }); });
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function go(dir) {
+      const s = step();
+      const max = grid.scrollWidth - grid.clientWidth;
+      const idx = Math.round(grid.scrollLeft / s);
+      const target = Math.max(0, Math.min((idx + dir) * s, max));
+      if (reduce) { grid.scrollLeft = target; update(); }
+      else easeScrollLeft(grid, target, 480, update);
+    }
+    prev.addEventListener("click", function () { go(-1); });
+    next.addEventListener("click", function () { go(1); });
 
     let ticking = false;
     grid.addEventListener("scroll", function () {
@@ -80,6 +89,31 @@ function setupCarouselControls() {
     window.addEventListener("resize", update);
     update();
   });
+}
+
+/* Buttery eased horizontal scroll for the carousel buttons (easeInOutCubic).
+   Snap is momentarily lifted during the animation so the browser's mandatory
+   snap doesn't fight the tween, then restored to hold the card in place. */
+function easeScrollLeft(el, target, duration, done) {
+  const start = el.scrollLeft;
+  const delta = target - start;
+  if (Math.abs(delta) < 1) { if (done) done(); return; }
+  const prevSnap = el.style.scrollSnapType;
+  el.style.scrollSnapType = "none";
+  let t0 = null;
+  function frame(now) {
+    if (t0 === null) t0 = now;
+    const t = Math.min(1, (now - t0) / duration);
+    const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    el.scrollLeft = start + delta * eased;
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      el.style.scrollSnapType = prevSnap || "";
+      if (done) done();
+    }
+  }
+  requestAnimationFrame(frame);
 }
 
 /* Count-up: metric figures tick from 0 up to their value the first time the

@@ -283,32 +283,33 @@ mark.is-visible {
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
-  color: #1d1d1f;
+  background: rgba(210, 210, 215, 0.72);
+  color: rgba(0, 0, 0, 0.56);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
 .carousel-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(210, 210, 215, 1);
+  color: rgba(0, 0, 0, 0.72);
 }
 
 .carousel-btn:active {
-  background: rgba(0, 0, 0, 0.14);
+  background: rgba(190, 190, 196, 1);
 }
 
 .carousel-btn:disabled {
-  opacity: 0.32;
+  opacity: 0.42;
   cursor: default;
 }
 
 .carousel-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Experience & Education cards */
@@ -516,6 +517,7 @@ mark.is-visible {
   .card-grid > * {
     flex: 0 0 80%;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
   /* Show the prev/next controls, right-aligned under the carousel */
