@@ -633,6 +633,7 @@ mark.is-visible {
   font-weight: 500;
 }
 
+
 /* ===== Footer ===== */
 .site-footer {
   background: #f5f5f7;
@@ -708,6 +709,43 @@ mark.is-visible {
   width: 18px;
   height: 18px;
   display: block;
+}
+
+/* ===== Mobile: nav floats as a rounded frosted bar at the bottom =====
+   Same glass treatment as the desktop bar, detached from the edges and
+   rounded like an iOS tab bar. Sits clear of the home indicator, and the
+   back-to-top button is lifted to stack directly above it (right edges
+   aligned) so the two never collide. Declared after .to-top so these
+   position overrides win the cascade. */
+@media (max-width: 600px) {
+  .site-nav {
+    position: fixed;
+    top: auto;
+    left: 16px;
+    right: 16px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    border-bottom: none;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 24px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
+    overflow: hidden; /* keeps the blur inside the rounded corners */
+  }
+
+  .nav-inner {
+    padding: 0 18px;
+    height: 52px;
+  }
+
+  /* Room so the footer/content can scroll clear of the floating bar */
+  body {
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Stack the back-to-top button above the bar, right edges flush with it */
+  .to-top {
+    right: 16px;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* ===== Blog listing ===== */
