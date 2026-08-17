@@ -912,6 +912,88 @@ mark.is-visible {
   color: #777;
 }
 
+/* ===== Blog work-in-progress gate =====
+   Placeholder posts are blurred behind a frosted "coming soon" card (same glass
+   treatment as the nav). Remove .is-wip from .posts-region to go live. */
+.posts-region {
+  position: relative;
+}
+
+.posts-region.is-wip .posts-inner {
+  filter: blur(7px);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  transform: scale(0.99);
+}
+
+.posts-region:not(.is-wip) .wip-overlay {
+  display: none;
+}
+
+.wip-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.wip-card {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  padding: 40px 40px 44px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.wip-badge {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #6e6e73;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.wip-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
+  margin-bottom: 10px;
+}
+
+.wip-text {
+  color: #6e6e73;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .posts-region.is-wip .posts-inner {
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  /* On phones the blurred list is tall, so anchor the card near the top —
+     keeps it clear of the floating bottom nav instead of centering into it. */
+  .wip-overlay {
+    align-items: flex-start;
+    padding-top: 44px;
+  }
+}
+
 /* ===== Bookshelf ===== */
 .page-intro {
   font-size: 1.05rem;

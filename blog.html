@@ -38,11 +38,26 @@
   <div class="container">
     <h1 class="page-title">All Posts</h1>
 
-    <input type="search" id="post-search" class="post-search" placeholder="Search posts…" aria-label="Search posts">
+    <!-- Work-in-progress gate: the posts below are placeholders, so they're
+         blurred behind a "coming soon" card. To go live, remove the "is-wip"
+         class from .posts-region (and delete the .wip-overlay block). -->
+    <div class="posts-region is-wip">
+      <div class="posts-inner">
+        <input type="search" id="post-search" class="post-search" placeholder="Search posts…" aria-label="Search posts">
 
-    <div class="post-filters" id="post-filters"></div>
+        <div class="post-filters" id="post-filters"></div>
 
-    <div class="post-list" id="post-list"></div>
+        <div class="post-list" id="post-list"></div>
+      </div>
+
+      <div class="wip-overlay" role="status" aria-live="polite">
+        <div class="wip-card">
+          <span class="wip-badge">✍️ Work in progress</span>
+          <h2 class="wip-title">Coming soon</h2>
+          <p class="wip-text">I'm writing my first posts. Check back shortly.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <footer class="site-footer">
