@@ -1008,6 +1008,27 @@ mark.is-visible {
   }
 }
 
+/* While the WIP gate is up, lock the page to the viewport so it reads as a
+   splash screen — no scrolling on mobile or desktop. Tied to .is-wip via
+   :has(), so removing that flag to go live also restores scrolling. */
+html:has(.posts-region.is-wip) {
+  overflow: hidden;
+}
+
+body:has(.posts-region.is-wip) {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Clip the tall blurred teaser instead of letting it grow the page, so the
+   footer stays put and nothing scrolls. */
+body:has(.posts-region.is-wip) .container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* ===== Bookshelf ===== */
 .page-intro {
   font-size: 1.05rem;
