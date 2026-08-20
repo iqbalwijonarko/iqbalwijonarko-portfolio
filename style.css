@@ -746,9 +746,26 @@ mark.is-visible {
     height: 52px;
   }
 
-  /* Room so the footer/content can scroll clear of the floating bar */
-  body {
-    padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
+  /* On mobile the floating nav is the bottom chrome, so the gray footer band
+     is redundant and looks stranded when the sticky-footer pushes it up. Drop
+     the band and show just a small centered copyright line, sitting clear
+     above the nav. The footer's own bottom padding provides the clearance the
+     body padding used to — so nothing (footer or scrolled content) hides
+     behind the floating bar. */
+  .site-footer {
+    background: transparent;
+    border-top: none;
+  }
+
+  .footer-inner {
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .footer-copy {
+    color: #9a9a9a;
+    font-size: 0.82rem;
   }
 
   /* Stack the back-to-top button above the bar, right edges flush with it */
