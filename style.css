@@ -932,12 +932,18 @@ mark.is-visible {
 }
 
 .wip-overlay {
-  position: absolute;
+  /* Fixed + centered so the card always sits in the middle of the screen
+     (between the nav and footer) regardless of viewport size or how tall the
+     blurred list behind it is. z-index below the nav (100) and to-top (200)
+     so those stay on top; pointer-events none so it never blocks the page. */
+  position: fixed;
   inset: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  pointer-events: none;
 }
 
 .wip-card {
@@ -982,15 +988,6 @@ mark.is-visible {
 @media (prefers-reduced-motion: reduce) {
   .posts-region.is-wip .posts-inner {
     transform: none;
-  }
-}
-
-@media (max-width: 600px) {
-  /* On phones the blurred list is tall, so anchor the card near the top —
-     keeps it clear of the floating bottom nav instead of centering into it. */
-  .wip-overlay {
-    align-items: flex-start;
-    padding-top: 44px;
   }
 }
 
