@@ -1022,11 +1022,15 @@ body:has(.posts-region.is-wip) {
 }
 
 /* Clip the tall blurred teaser instead of letting it grow the page, so the
-   footer stays put and nothing scrolls. */
+   footer stays put and nothing scrolls. A gradient mask fades the teaser out
+   toward the bottom so it dissolves smoothly instead of ending in a hard,
+   ugly clipped edge. */
 body:has(.posts-region.is-wip) .container {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 94%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 94%);
 }
 
 /* ===== Bookshelf ===== */
