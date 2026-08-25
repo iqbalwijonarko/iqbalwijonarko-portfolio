@@ -27,7 +27,8 @@
       ]
     },
     "cta": { "text": "Let's talk strategy", "href": "https://www.linkedin.com/in/iqbalwijonarko/" },
-    "ctaSecondary": { "text": "Follow my reading on Goodreads", "href": "https://www.goodreads.com/user/show/172769224-iqbal-wijonarko" }
+    "ctaSecondary": { "text": "Follow my reading on Goodreads", "href": "https://www.goodreads.com/user/show/172769224-iqbal-wijonarko" },
+    "ctaTertiary": { "text": "Follow my music on Spotify", "href": "https://open.spotify.com/user/iqbal.thea32" }
   },
   "experience": [
     {

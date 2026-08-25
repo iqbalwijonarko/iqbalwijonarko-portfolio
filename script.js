@@ -366,12 +366,22 @@ function renderAbout(about) {
   let html = '<p class="about-eyebrow">' + escapeHTML(about.eyebrow) + "</p>";
   html += '<h2 class="about-headline">' + escapeHTML(about.headline) + "</h2>";
   html += '<p class="about-lead">' + escapeHTML(about.lead) + "</p>";
-  const ctas = [];
-  if (about.cta && about.cta.href) ctas.push(ctaLink(about.cta, "about-cta"));
+  // Primary action stands alone; the quieter "follow me" links group in a row
+  // beneath it, so adding a third link doesn't orphan-wrap awkwardly.
+  const follows = [];
   if (about.ctaSecondary && about.ctaSecondary.href) {
-    ctas.push(ctaLink(about.ctaSecondary, "about-cta about-cta--secondary"));
+    follows.push(ctaLink(about.ctaSecondary, "about-cta about-cta--secondary"));
   }
-  if (ctas.length) html += '<div class="about-ctas">' + ctas.join("") + "</div>";
+  if (about.ctaTertiary && about.ctaTertiary.href) {
+    follows.push(ctaLink(about.ctaTertiary, "about-cta about-cta--secondary"));
+  }
+  const hasPrimary = about.cta && about.cta.href;
+  if (hasPrimary || follows.length) {
+    html += '<div class="about-ctas">';
+    if (hasPrimary) html += ctaLink(about.cta, "about-cta");
+    if (follows.length) html += '<div class="about-follows">' + follows.join("") + "</div>";
+    html += "</div>";
+  }
   intro.innerHTML = html;
 
   const metricsEyebrow = document.getElementById("metrics-eyebrow");

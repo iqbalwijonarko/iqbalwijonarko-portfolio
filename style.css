@@ -125,10 +125,18 @@ section {
 /* Primary + secondary calls to action, side by side (wrap on narrow widths). */
 .about-ctas {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+/* The quieter "follow me" links sit together in a row below the primary CTA. */
+.about-follows {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 26px;
-  margin-top: 28px;
+  gap: 10px 24px;
 }
 
 .about-cta {
