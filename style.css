@@ -87,6 +87,7 @@ section {
   max-width: 300px;
   height: auto;
   display: block;
+  border-radius: 20px; /* rounded corners (the new photo isn't pre-rounded) */
   /* drop-shadow (not box-shadow) so the shadow follows the photo's actual
      shape, not the transparent rectangular padding baked into the PNG. */
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.16));
@@ -480,6 +481,7 @@ mark.is-visible {
      a shorter, smaller portrait: keep the face + stickers (anchored to the
      top), trim the lower torso, and re-round the corners via CSS since the
      baked-in rounding is lost once the image is cover-cropped. */
+  /* Mobile: a shorter, rounded crop of the (already tightly-trimmed) portrait. */
   .about-photo img {
     margin-left: auto;
     margin-right: auto;
@@ -487,7 +489,7 @@ mark.is-visible {
     max-width: 210px;
     height: 230px;
     object-fit: cover;
-    object-position: top center;
+    object-position: center 25%;
     border-radius: 22px;
   }
 
