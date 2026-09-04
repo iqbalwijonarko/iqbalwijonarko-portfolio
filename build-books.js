@@ -152,10 +152,11 @@ function buildFromCSV(csvText) {
     const year = dateRead ? parseInt(dateRead.slice(0, 4), 10) : null;
     const pages = parseInt(cells[iPages], 10) || null;
 
-    // ISBN13 preferred, ISBN10 fallback; used only at build time to fetch a
-    // cover, then dropped from the output (the page doesn't need it).
-    const isbn = (unwrap((cells[iISBN13] || "").trim()) ||
-                  unwrap((cells[iISBN] || "").trim())).replace(/[^0-9Xx]/g, "");
+    // Both ISBNs are kept as cover-lookup candidates (some editions only have
+    // art under one of them). Build-time only; dropped from the output.
+    const isbns = [cells[iISBN13], cells[iISBN]]
+      .map(function (v) { return unwrap((v || "").trim()).replace(/[^0-9Xx]/g, ""); })
+      .filter(function (v) { return v.length >= 10; });
 
     books.push({
       title: title,
@@ -166,7 +167,7 @@ function buildFromCSV(csvText) {
       year: year,
       pages: pages,
       cover: null, // set by fetchCovers() when a cover is found, else stays null
-      _isbn: isbn || null // internal only; removed before writing books.json
+      _isbns: isbns // internal only; removed before writing books.json
     });
   }
 
@@ -200,39 +201,110 @@ function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
    path or null. Cached: if the file already exists we reuse it and skip the
    network. Uses ?default=false so missing covers 404 instead of returning a
    blank placeholder image. */
-async function fetchCover(isbn, slug) {
+/* Save one image to assets/books/<slug>.jpg. Returns true on success.
+   Tiny responses are rejected: Open Library answers some misses with a
+   1x1/blank image rather than a 404. */
+async function download(url, dest) {
+  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, redirect: "follow" });
+  if (!res.ok) return false;
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length < 1000) return false;
+  fs.mkdirSync(COVERS_DIR, { recursive: true });
+  fs.writeFileSync(dest, buf);
+  await sleep(150); // gentle pacing between live requests
+  return true;
+}
+
+/* Normalised title key used to sanity-check a loose search hit, so a fuzzy
+   query can't attach some unrelated book's art to this entry. */
+function titleKey(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+async function searchDocs(params) {
+  const url = "https://openlibrary.org/search.json?" + params + "&limit=5&fields=title,author_name,cover_i";
+  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  await sleep(150);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.docs || [];
+}
+
+/* Look the book up in Open Library's search API and return a cover id.
+   The Goodreads title carries subtitles and parentheticals ("Atomic Habits:
+   An Easy & Proven Way to...") which rarely match, so we search on the main
+   title plus author. If that finds nothing we retry as one loose query, which
+   rescues edition/author-name mismatches (Goodreads' "Case in Point 12th
+   Edition" by "Marc Cosentino" vs Open Library's "Case in point" by "Marc
+   Patrick Cosentino"). Loose hits must still agree on the start of the title. */
+async function findCoverId(title, author) {
+  const mainTitle = String(title).split(":")[0].replace(/\([^)]*\)/g, "").trim();
+
+  const exact = await searchDocs(
+    "title=" + encodeURIComponent(mainTitle) + "&author=" + encodeURIComponent(author)
+  );
+  const hit = exact.find(function (d) { return d.cover_i; });
+  if (hit) return hit.cover_i;
+
+  // Edition/ordinal noise ("12th Edition", trailing volume numbers) makes the
+  // general query return nothing, so drop it for the loose attempt. The guard
+  // below still compares against the ORIGINAL title, so this only widens the
+  // search, it can't loosen the match check.
+  const looseTitle = mainTitle
+    .replace(/\b\d+(st|nd|rd|th)\b/gi, " ")
+    .replace(/\bedition\b/gi, " ")
+    .replace(/\s+\d+\s*$/, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const want = titleKey(mainTitle).slice(0, 10);
+  const loose = await searchDocs("q=" + encodeURIComponent(looseTitle + " " + author));
+  const near = loose.find(function (d) {
+    return d.cover_i && want && titleKey(d.title || "").slice(0, 10) === want;
+  });
+  return near ? near.cover_i : null;
+}
+
+/* Find a cover for one book, most-exact source first:
+     1. ISBN13, 2. ISBN10   -> /b/isbn/...
+     3. title + author search -> cover id -> /b/id/...
+   Step 3 is what rescues the ~10 books Goodreads exports with no ISBN at all,
+   plus editions whose ISBN simply has no art. Looking up by cover id is also
+   the route Open Library does NOT rate-limit. Anything still not found keeps
+   the text placeholder tile, so the page degrades gracefully. */
+async function fetchCover(book, slug) {
   const dest = path.join(COVERS_DIR, slug + ".jpg");
   const rel = COVERS_REL + "/" + slug + ".jpg";
 
   if (fs.existsSync(dest)) return rel; // already have it — be kind to Open Library
-
   if (SKIP_COVERS || typeof fetch !== "function") return null;
 
-  const url = "https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg?default=false";
   try {
-    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, redirect: "follow" });
-    if (!res.ok) return null;
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length < 1000) return null; // guard against tiny/blank responses
-    fs.mkdirSync(COVERS_DIR, { recursive: true });
-    fs.writeFileSync(dest, buf);
-    await sleep(150); // gentle pacing between live downloads
-    return rel;
+    for (const isbn of book._isbns || []) {
+      if (await download("https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg?default=false", dest)) {
+        return rel;
+      }
+    }
+    const id = await findCoverId(book.title, book.author);
+    if (id && await download("https://covers.openlibrary.org/b/id/" + id + "-M.jpg?default=false", dest)) {
+      return rel;
+    }
   } catch (e) {
-    return null; // network/offline issues shouldn't break the build
+    // A lookup failure must never break the build, but stay loud about it so
+    // a missing cover is diagnosable instead of silently shrugged off.
+    console.warn("  ! cover lookup failed for " + book.title + ": " + e.message);
   }
+  return null;
 }
 
-/* Fill in book.cover for every book with an ISBN. */
+/* Fill in book.cover for every book we can find art for. */
 async function fetchCovers(books) {
   const slugFor = makeSlugger();
   let got = 0;
   for (const b of books) {
-    if (b._isbn) {
-      const rel = await fetchCover(b._isbn, slugFor(b.title));
-      if (rel) { b.cover = rel; got++; }
-    }
-    delete b._isbn; // never ship the ISBN — the page doesn't use it
+    const rel = await fetchCover(b, slugFor(b.title));
+    if (rel) { b.cover = rel; got++; }
+    delete b._isbns; // never ship ISBNs — the page doesn't use them
   }
   return got;
 }
@@ -246,7 +318,7 @@ async function main() {
     books = buildFromCSV(csv);
     source = "goodreads_library_export.csv (" + books.length + " books)";
   } else {
-    books = SAMPLE_BOOKS.map(function (b) { return Object.assign({ _isbn: null }, b); });
+    books = SAMPLE_BOOKS.map(function (b) { return Object.assign({ _isbns: [] }, b); });
     source = "sample data (no CSV found — add goodreads_library_export.csv and re-run)";
   }
 
