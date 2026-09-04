@@ -265,6 +265,108 @@ async function findCoverId(title, author) {
   return near ? near.cover_i : null;
 }
 
+/* Deterministic hue from a string, mirroring the colouring the page uses for
+   its placeholder tiles so a generated cover looks native to the shelf. */
+function hueFromString(str) {
+  let h = 0;
+  for (let i = 0; i < String(str).length; i++) {
+    h = (h * 31 + String(str).charCodeAt(i)) % 360;
+  }
+  return h;
+}
+
+function escapeXML(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/* Greedy word-wrap; SVG has no auto-wrapping so lines are measured here. */
+function wrapLines(text, maxChars, maxLines) {
+  const words = String(text).trim().split(" ").filter(Boolean);
+  const lines = [];
+  let cur = "";
+  let truncated = false;
+  for (const w of words) {
+    const next = cur ? cur + " " + w : w;
+    if (next.length <= maxChars || !cur) {
+      cur = next;
+    } else if (lines.length + 1 < maxLines) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      truncated = true;
+      break;
+    }
+  }
+  if (cur) lines.push(cur);
+  if (truncated) lines[lines.length - 1] = lines[lines.length - 1] + "…";
+  return lines;
+}
+
+/* GUARANTEED last resort: draw a typographic cover ourselves.
+   Some books simply have no art in any free source (niche or non-English
+   titles), so relying on lookups alone can never reach 100%. Generating the
+   cover means every book — today and every future export — ends up with a
+   real <img>, on the same lazy-loaded, fixed-ratio path as a photographed
+   cover, so nothing about performance, layout stability or SEO changes.
+   SVG is used deliberately: ~1 KB, sharp at any size, and it needs no image
+   library, keeping the build dependency-free and portable. */
+function writeGeneratedCover(book, slug) {
+  const rel = COVERS_REL + "/" + slug + ".svg";
+  const dest = path.join(COVERS_DIR, slug + ".svg");
+  if (fs.existsSync(dest)) return rel;
+
+  const Q = String.fromCharCode(39); // single quote, used to delimit SVG attributes
+  const h = hueFromString(book.title + book.author);
+  const bg = "hsl(" + h + ", 30%, 94%)";
+  const ink = "hsl(" + h + ", 32%, 26%)";
+  const soft = "hsl(" + h + ", 20%, 45%)";
+  const rule = "hsl(" + h + ", 26%, 80%)";
+
+  const titleLines = wrapLines(book.title, 17, 5);
+  const authorLines = wrapLines(book.author || "", 22, 2);
+
+  const LH = 42;
+  // Centre the whole text block vertically in the 600-tall cover.
+  const blockH = titleLines.length * LH + (authorLines.length ? 26 + authorLines.length * 26 : 0);
+  let y = Math.round((600 - blockH) / 2) + 30;
+
+  let text = "";
+  titleLines.forEach(function (l, i) {
+    text += "<text x=" + Q + "200" + Q + " y=" + Q + (y + i * LH) + Q +
+      " text-anchor=" + Q + "middle" + Q + " font-size=" + Q + "34" + Q +
+      " font-weight=" + Q + "700" + Q + " fill=" + Q + ink + Q + ">" + escapeXML(l) + "</text>";
+  });
+  const aY = y + titleLines.length * LH + 20;
+  authorLines.forEach(function (l, i) {
+    text += "<text x=" + Q + "200" + Q + " y=" + Q + (aY + i * 26) + Q +
+      " text-anchor=" + Q + "middle" + Q + " font-size=" + Q + "20" + Q +
+      " fill=" + Q + soft + Q + ">" + escapeXML(l) + "</text>";
+  });
+
+  const label = escapeXML(book.title + (book.author ? " by " + book.author : ""));
+  // Unquoted family names: the attribute itself is single-quoted, so inner
+  // quotes would end it early. CSS allows multi-word names unquoted.
+  const font = "Inter, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif";
+  const svg =
+    "<svg xmlns=" + Q + "http://www.w3.org/2000/svg" + Q +
+      " viewBox=" + Q + "0 0 400 600" + Q + " width=" + Q + "400" + Q + " height=" + Q + "600" + Q +
+      " role=" + Q + "img" + Q + " aria-label=" + Q + label + Q + ">" +
+      "<rect width=" + Q + "400" + Q + " height=" + Q + "600" + Q + " fill=" + Q + bg + Q + "/>" +
+      "<rect x=" + Q + "26" + Q + " y=" + Q + "26" + Q + " width=" + Q + "348" + Q + " height=" + Q + "548" + Q +
+        " fill=" + Q + "none" + Q + " stroke=" + Q + rule + Q + " stroke-width=" + Q + "1.5" + Q + "/>" +
+      "<g font-family=" + Q + font + Q + ">" + text + "</g>" +
+    "</svg>";
+
+  fs.mkdirSync(COVERS_DIR, { recursive: true });
+  fs.writeFileSync(dest, svg, "utf8");
+  return rel;
+}
+
 /* Find a cover for one book, most-exact source first:
      1. ISBN13, 2. ISBN10   -> /b/isbn/...
      3. title + author search -> cover id -> /b/id/...
@@ -297,16 +399,28 @@ async function fetchCover(book, slug) {
   return null;
 }
 
-/* Fill in book.cover for every book we can find art for. */
+/* Give EVERY book a cover: look for real artwork first, and draw one when
+   none exists anywhere. Returns counts so the build can report both. */
 async function fetchCovers(books) {
   const slugFor = makeSlugger();
-  let got = 0;
+  let found = 0;
+  let drawn = 0;
   for (const b of books) {
-    const rel = await fetchCover(b, slugFor(b.title));
-    if (rel) { b.cover = rel; got++; }
+    const slug = slugFor(b.title);
+    const rel = await fetchCover(b, slug);
+    if (rel) {
+      b.cover = rel;
+      found++;
+      // Real artwork supersedes a cover we drew on an earlier run.
+      const stale = path.join(COVERS_DIR, slug + ".svg");
+      if (fs.existsSync(stale)) fs.unlinkSync(stale);
+    } else {
+      b.cover = writeGeneratedCover(b, slug);
+      drawn++;
+    }
     delete b._isbns; // never ship ISBNs — the page doesn't use them
   }
-  return got;
+  return { found: found, drawn: drawn };
 }
 
 async function main() {
@@ -327,8 +441,11 @@ async function main() {
   const json = JSON.stringify({ books: books }, null, 2) + "\n";
   fs.writeFileSync(OUT_PATH, json, "utf8");
   console.log("Wrote " + path.basename(OUT_PATH) + " from " + source + ".");
-  console.log(covers + " of " + books.length + " books have a local cover" +
-    (SKIP_COVERS ? " (covers skipped: --no-covers)" : "") + "; the rest use text placeholders.");
+  console.log(
+    books.length + "/" + books.length + " books have a cover: " +
+    covers.found + " real" + (SKIP_COVERS ? " (lookups skipped)" : "") +
+    ", " + covers.drawn + " generated."
+  );
 }
 
 main();

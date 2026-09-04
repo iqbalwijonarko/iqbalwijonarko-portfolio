@@ -168,7 +168,7 @@
       "dateRead": "2023-12-22",
       "year": 2023,
       "pages": 400,
-      "cover": null
+      "cover": "assets/books/chairul-tanjung-si-anak-singkong.svg"
     },
     {
       "title": "Muhammad Al-Fatih 1453",
@@ -178,7 +178,7 @@
       "dateRead": "2023-12-22",
       "year": 2023,
       "pages": 320,
-      "cover": null
+      "cover": "assets/books/muhammad-al-fatih-1453.svg"
     },
     {
       "title": "Deep Work: Rules for Focused Success in a Distracted World",
