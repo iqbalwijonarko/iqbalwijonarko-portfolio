@@ -261,21 +261,28 @@ async function getJSON(url) {
 
 /* Resolve the book to an Open Library *work*, trying the precise query first
    and then a looser one for edition/author-name mismatches. */
-async function findWorkKey(title, author) {
+/* Every work that plausibly matches, best query first — not just the first hit.
+   Open Library files translations as separate works with near-identical titles,
+   so an exact title+author search can legitimately return the Portuguese edition
+   of "Sam Walton, Made in America" ahead of the English one. Returning a list
+   lets the caller move on to the next work when the first yields no usable
+   English cover, instead of giving up on a book that Open Library actually has. */
+async function findWorkKeys(title, author) {
   const main = mainTitleOf(title);
   const queries = [
     "title=" + encodeURIComponent(main) + "&author=" + encodeURIComponent(author),
     "q=" + encodeURIComponent(looseTitleOf(main) + " " + author)
   ];
+  const keys = [];
   for (const params of queries) {
     const data = await getJSON("https://openlibrary.org/search.json?" + params +
       "&limit=5&fields=key,title,author_name");
-    const hit = ((data && data.docs) || []).find(function (d) {
-      return d.key && titlesAgree(main, d.title) && authorsAgree(author, d.author_name);
-    });
-    if (hit) return hit.key;
+    for (const d of (data && data.docs) || []) {
+      if (!d.key || keys.indexOf(d.key) !== -1) continue;
+      if (titlesAgree(main, d.title) && authorsAgree(author, d.author_name)) keys.push(d.key);
+    }
   }
-  return null;
+  return keys.slice(0, 4);
 }
 
 /* Cover ids for a work's ENGLISH editions, newest edition first.
@@ -288,18 +295,29 @@ async function findWorkKey(title, author) {
    printing over the familiar 2018 cover. */
 async function englishCoverIds(workKey) {
   const data = await getJSON("https://openlibrary.org" + workKey + "/editions.json?limit=100");
-  const rows = [];
+  const eng = [];
+  const untagged = [];
   for (const e of (data && data.entries) || []) {
     const langs = (e.languages || []).map(function (l) {
       return String(l.key || "").split("/").pop();
     });
     const cover = (e.covers || []).find(function (c) { return c && c > 0; });
-    if (!cover || langs.length !== 1 || langs[0] !== "eng") continue;
+    if (!cover) continue;
+    // Audiobook editions carry square disc/app artwork, not the book's cover.
+    if (/audio|audible|cassette|\bcd\b|mp3/i.test(String(e.physical_format || ""))) continue;
     const m = String(e.publish_date || "").match(/(1[89]|20)\d\d/);
-    rows.push({ year: m ? parseInt(m[0], 10) : 0, cover: cover });
+    const row = { year: m ? parseInt(m[0], 10) : 0, cover: cover };
+    if (langs.length === 1 && langs[0] === "eng") eng.push(row);
+    // Plenty of English records simply omit the language field. Keep those as a
+    // second tier: a foreign edition almost always *does* declare its language,
+    // so this widens the pool without letting the French reprint back in.
+    else if (langs.length === 0) untagged.push(row);
   }
-  rows.sort(function (a, b) { return b.year - a.year; }); // newest edition first
-  return rows.slice(0, 6).map(function (r) { return r.cover; });
+  const byNewest = function (a, b) { return b.year - a.year; };
+  eng.sort(byNewest);
+  untagged.sort(byNewest);
+  // Deeper pool than we expect to need, because the quality gate rejects some.
+  return eng.concat(untagged).slice(0, 12).map(function (r) { return r.cover; });
 }
 
 /* Fetch image bytes, rejecting the tiny blank placeholder Open Library
@@ -418,6 +436,87 @@ function writeGeneratedCover(book, slug) {
   return rel;
 }
 
+/* --------------------------------------------------------------------------
+   Cover quality gate
+   --------------------------------------------------------------------------
+   Open Library accepts community uploads, so a "cover" is sometimes a phone
+   photo of a paperback on a desk, an Amazon "Look Inside" scan with watermark
+   bands, or a square crop that slices the title off. Those look obviously
+   wrong in a tidy grid.
+
+   Real publisher cover files are consistently shaped: a portrait rectangle
+   around 2:3. Photos and bad crops are not - the desk shot of "Thinking, Fast
+   and Slow" came back at 0.46, a square crop of "Inspired" at 1.00. So the
+   shape of the image is a cheap, reliable proxy for whether it is real cover
+   art, and it needs no image library: JPEG and PNG both state their dimensions
+   in the header, a few bytes in.
+
+   A candidate that fails the gate is skipped and the next one is tried, so a
+   book falls back to a worse-but-real cover rather than to a bad image. */
+
+const COVER_MIN_RATIO = 0.60; // narrower than this is a photo, a spine, or a tight crop
+const COVER_MAX_RATIO = 0.78; // wider than this is a crop, a square, or a spread
+const COVER_MIN_WIDTH = 120;  // below this the title is unreadable in the grid
+
+/* Read pixel dimensions straight from the file header. Returns null for
+   anything we cannot parse, which the gate treats as a rejection. */
+function imageSize(buf) {
+  if (!buf || buf.length < 24) return null;
+
+  // PNG: IHDR width/height are big-endian uint32s at a fixed offset.
+  if (buf[0] === 0x89 && buf.toString("latin1", 1, 4) === "PNG") {
+    return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+  }
+
+  // JPEG: walk the marker segments to the start-of-frame, which carries the size.
+  if (buf[0] === 0xff && buf[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < buf.length) {
+      if (buf[i] !== 0xff) { i++; continue; }         // resync on padding
+      const marker = buf[i + 1];
+      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
+      const len = buf.readUInt16BE(i + 2);
+      // SOF0..SOF15, excluding the non-frame markers DHT (c4), JPGA (c8), DAC (cc)
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+      }
+      i += 2 + len;
+    }
+  }
+  return null;
+}
+
+/* True when the image is shaped like real cover art. Explains itself so a
+   rejection shows up in the build log rather than vanishing. */
+function isCoverShaped(buf, label) {
+  const size = imageSize(buf);
+  if (!size || !size.w || !size.h) {
+    console.warn("    - " + label + ": unreadable image, skipped");
+    return false;
+  }
+  const ratio = size.w / size.h;
+  if (size.w < COVER_MIN_WIDTH) {
+    console.warn("    - " + label + ": only " + size.w + "px wide, skipped");
+    return false;
+  }
+  if (ratio < COVER_MIN_RATIO || ratio > COVER_MAX_RATIO) {
+    console.warn(
+      "    - " + label + ": aspect " + ratio.toFixed(2) + " (" + size.w + "x" + size.h +
+      ") is not cover-shaped, skipped"
+    );
+    return false;
+  }
+  return true;
+}
+
+/* fetchImage plus the shape gate. Use this for every automatic candidate;
+   a manual override in cover-overrides.json deliberately bypasses it. */
+async function fetchCoverCandidate(url, label) {
+  const buf = await fetchImage(url);
+  if (!buf) return null;
+  return isCoverShaped(buf, label) ? buf : null;
+}
+
 /* Manually pinned covers. Open Library is community-catalogued, so an edition
    record occasionally carries the wrong image — the 2023 "Psychology of Money"
    entry, for instance, has an unofficial summary book's cover attached. No
@@ -453,7 +552,13 @@ async function fetchCover(book, slug) {
   const dest = path.join(COVERS_DIR, slug + ".jpg");
   const rel = COVERS_REL + "/" + slug + ".jpg";
 
-  if (fs.existsSync(dest)) return rel; // already have it — be kind to Open Library
+  // Already have it? Re-check the shape before trusting it. Skipping this is how
+  // a bad cover downloaded by an older build would survive every future run.
+  // Re-reading a local file is free; only a failure costs a network round trip.
+  if (fs.existsSync(dest)) {
+    if (isCoverShaped(fs.readFileSync(dest), book.title + " (cached)")) return rel;
+    fs.unlinkSync(dest);
+  }
 
   const pinned = OVERRIDES[book.title];
   if (pinned !== undefined) {
@@ -468,18 +573,28 @@ async function fetchCover(book, slug) {
 
   if (SKIP_COVERS || typeof fetch !== "function") return null;
 
+  function keep(buf) {
+    fs.mkdirSync(COVERS_DIR, { recursive: true });
+    fs.writeFileSync(dest, buf);
+    return rel;
+  }
+
   try {
     for (const isbn of book._isbns || []) {
-      const buf = await fetchImage("https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg?default=false");
-      if (buf) { fs.mkdirSync(COVERS_DIR, { recursive: true }); fs.writeFileSync(dest, buf); return rel; }
+      const buf = await fetchCoverCandidate(
+        "https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg?default=false",
+        book.title + " isbn " + isbn
+      );
+      if (buf) return keep(buf);
     }
 
-    const workKey = await findWorkKey(book.title, book.author);
-    if (workKey) {
-      const ids = await englishCoverIds(workKey);
-      for (const id of ids) {
-        const buf = await fetchImage("https://covers.openlibrary.org/b/id/" + id + "-M.jpg?default=false");
-        if (buf) { fs.mkdirSync(COVERS_DIR, { recursive: true }); fs.writeFileSync(dest, buf); return rel; }
+    for (const workKey of await findWorkKeys(book.title, book.author)) {
+      for (const id of await englishCoverIds(workKey)) {
+        const buf = await fetchCoverCandidate(
+          "https://covers.openlibrary.org/b/id/" + id + "-M.jpg?default=false",
+          book.title + " cover " + id
+        );
+        if (buf) return keep(buf);
       }
     }
   } catch (e) {
@@ -522,7 +637,15 @@ async function fetchCovers(books) {
 function writeAudit(books) {
   const rows = books.map(function (b, i) {
     const src = b.cover ? "../" + b.cover : "";
-    const art = b.cover && /\.svg$/.test(b.cover) ? " (generated)" : "";
+    let art = "";
+    if (b.cover && /\.svg$/.test(b.cover)) {
+      art = " &middot; generated";
+    } else if (b.cover) {
+      // Print the aspect ratio next to each cover: the shape gate runs on fetch,
+      // but seeing the number makes a borderline image easy to spot by eye too.
+      const size = imageSize(fs.readFileSync(path.join(__dirname, b.cover)));
+      if (size) art = " &middot; " + size.w + "x" + size.h + " &middot; " + (size.w / size.h).toFixed(2);
+    }
     return (
       '<figure>' +
       (src ? '<img src="' + escapeXML(src) + '" alt="" loading="lazy">' : '<div class="none"></div>') +
