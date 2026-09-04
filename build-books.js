@@ -48,6 +48,8 @@ const COVERS_REL = "assets/books"; // path as referenced from the site root
 // Polite, identifying User-Agent (Open Library asks apps to identify themselves).
 const USER_AGENT = "iqbalwijonarko-portfolio/1.0 (personal site build; +https://iqbalwijonarko.com)";
 const SKIP_COVERS = process.argv.includes("--no-covers");
+const AUDIT = process.argv.includes("--audit");
+const OVERRIDES_PATH = path.join(__dirname, "cover-overrides.json");
 
 /* Schema reference — also the fallback data when no CSV is present.
    Each book: title, author, rating (0-5, 0 = unrated), shelf
@@ -201,68 +203,117 @@ function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
    path or null. Cached: if the file already exists we reuse it and skip the
    network. Uses ?default=false so missing covers 404 instead of returning a
    blank placeholder image. */
-/* Save one image to assets/books/<slug>.jpg. Returns true on success.
-   Tiny responses are rejected: Open Library answers some misses with a
-   1x1/blank image rather than a 404. */
-async function download(url, dest) {
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, redirect: "follow" });
-  if (!res.ok) return false;
-  const buf = Buffer.from(await res.arrayBuffer());
-  if (buf.length < 1000) return false;
-  fs.mkdirSync(COVERS_DIR, { recursive: true });
-  fs.writeFileSync(dest, buf);
-  await sleep(150); // gentle pacing between live requests
-  return true;
-}
-
-/* Normalised title key used to sanity-check a loose search hit, so a fuzzy
-   query can't attach some unrelated book's art to this entry. */
 function titleKey(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-async function searchDocs(params) {
-  const url = "https://openlibrary.org/search.json?" + params + "&limit=5&fields=title,author_name,cover_i";
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  await sleep(150);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.docs || [];
+/* The Goodreads title carries subtitles and parentheticals ("Atomic Habits:
+   An Easy & Proven Way to...") that rarely match Open Library, so searches
+   use the main title only. */
+function mainTitleOf(title) {
+  return String(title).split(":")[0].replace(/\([^)]*\)/g, "").trim();
 }
 
-/* Look the book up in Open Library's search API and return a cover id.
-   The Goodreads title carries subtitles and parentheticals ("Atomic Habits:
-   An Easy & Proven Way to...") which rarely match, so we search on the main
-   title plus author. If that finds nothing we retry as one loose query, which
-   rescues edition/author-name mismatches (Goodreads' "Case in Point 12th
-   Edition" by "Marc Cosentino" vs Open Library's "Case in point" by "Marc
-   Patrick Cosentino"). Loose hits must still agree on the start of the title. */
-async function findCoverId(title, author) {
-  const mainTitle = String(title).split(":")[0].replace(/\([^)]*\)/g, "").trim();
-
-  const exact = await searchDocs(
-    "title=" + encodeURIComponent(mainTitle) + "&author=" + encodeURIComponent(author)
-  );
-  const hit = exact.find(function (d) { return d.cover_i; });
-  if (hit) return hit.cover_i;
-
-  // Edition/ordinal noise ("12th Edition", trailing volume numbers) makes the
-  // general query return nothing, so drop it for the loose attempt. The guard
-  // below still compares against the ORIGINAL title, so this only widens the
-  // search, it can't loosen the match check.
-  const looseTitle = mainTitle
+/* Edition/ordinal noise makes the general query return nothing, so it is
+   dropped for the loose attempt ("Case in Point 12th Edition" -> "Case in
+   Point"). Match checking always uses the original title. */
+function looseTitleOf(mainTitle) {
+  return mainTitle
     .replace(/\b\d+(st|nd|rd|th)\b/gi, " ")
     .replace(/\bedition\b/gi, " ")
     .replace(/\s+\d+\s*$/, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
 
-  const want = titleKey(mainTitle).slice(0, 10);
-  const loose = await searchDocs("q=" + encodeURIComponent(looseTitle + " " + author));
-  const near = loose.find(function (d) {
-    return d.cover_i && want && titleKey(d.title || "").slice(0, 10) === want;
-  });
-  return near ? near.cover_i : null;
+/* A candidate is only accepted when the start of its normalised title still
+   agrees with the book we asked for, so a fuzzy query can never attach an
+   unrelated book's artwork. */
+function titlesAgree(want, candidate) {
+  const a = titleKey(want);
+  const b = titleKey(candidate || "");
+  if (!a || !b) return false;
+  const n = Math.min(12, a.length, b.length);
+  return n >= 5 && a.slice(0, n) === b.slice(0, n);
+}
+
+/* Titles alone are not enough: Open Library also carries unofficial
+   "summary" books that copy a bestseller's title, so "The Psychology of
+   Money" once resolved to a study guide by a different author. Comparing
+   surnames rejects those while still tolerating how the same person is
+   spelled across editions ("Marc Cosentino" vs "Marc Patrick Cosentino"). */
+function surnameOf(name) {
+  const parts = String(name).toLowerCase().replace(/[^a-z ]/g, " ").trim().split(/ +/);
+  return parts.length ? parts[parts.length - 1] : "";
+}
+
+function authorsAgree(want, names) {
+  const w = surnameOf(want);
+  if (!w) return true; // nothing to check against; don't block on it
+  return (names || []).some(function (n) { return surnameOf(n) === w; });
+}
+
+async function getJSON(url) {
+  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  await sleep(150);
+  return res.ok ? res.json() : null;
+}
+
+/* Resolve the book to an Open Library *work*, trying the precise query first
+   and then a looser one for edition/author-name mismatches. */
+async function findWorkKey(title, author) {
+  const main = mainTitleOf(title);
+  const queries = [
+    "title=" + encodeURIComponent(main) + "&author=" + encodeURIComponent(author),
+    "q=" + encodeURIComponent(looseTitleOf(main) + " " + author)
+  ];
+  for (const params of queries) {
+    const data = await getJSON("https://openlibrary.org/search.json?" + params +
+      "&limit=5&fields=key,title,author_name");
+    const hit = ((data && data.docs) || []).find(function (d) {
+      return d.key && titlesAgree(main, d.title) && authorsAgree(author, d.author_name);
+    });
+    if (hit) return hit.key;
+  }
+  return null;
+}
+
+/* Cover ids for a work's ENGLISH editions, newest edition first.
+   Two lessons are baked in here. The work-level "cover_i" from search is
+   whatever edition Open Library happens to favour, which is how "How to Win
+   Friends" ended up with a French cover — so language is read from the
+   edition list instead of left to luck. And the edition people actually
+   recognise is the one currently in print, so editions are ordered by
+   publication year: picking by file size instead had chosen a 1953 vintage
+   printing over the familiar 2018 cover. */
+async function englishCoverIds(workKey) {
+  const data = await getJSON("https://openlibrary.org" + workKey + "/editions.json?limit=100");
+  const rows = [];
+  for (const e of (data && data.entries) || []) {
+    const langs = (e.languages || []).map(function (l) {
+      return String(l.key || "").split("/").pop();
+    });
+    const cover = (e.covers || []).find(function (c) { return c && c > 0; });
+    if (!cover || langs.length !== 1 || langs[0] !== "eng") continue;
+    const m = String(e.publish_date || "").match(/(1[89]|20)\d\d/);
+    rows.push({ year: m ? parseInt(m[0], 10) : 0, cover: cover });
+  }
+  rows.sort(function (a, b) { return b.year - a.year; }); // newest edition first
+  return rows.slice(0, 6).map(function (r) { return r.cover; });
+}
+
+/* Fetch image bytes, rejecting the tiny blank placeholder Open Library
+   sometimes returns instead of a 404. */
+async function fetchImage(url) {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, redirect: "follow" });
+    await sleep(150);
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    return buf.length >= 1000 ? buf : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 /* Deterministic hue from a string, mirroring the colouring the page uses for
@@ -367,29 +418,69 @@ function writeGeneratedCover(book, slug) {
   return rel;
 }
 
-/* Find a cover for one book, most-exact source first:
-     1. ISBN13, 2. ISBN10   -> /b/isbn/...
-     3. title + author search -> cover id -> /b/id/...
-   Step 3 is what rescues the ~10 books Goodreads exports with no ISBN at all,
-   plus editions whose ISBN simply has no art. Looking up by cover id is also
-   the route Open Library does NOT rate-limit. Anything still not found keeps
-   the text placeholder tile, so the page degrades gracefully. */
+/* Manually pinned covers. Open Library is community-catalogued, so an edition
+   record occasionally carries the wrong image — the 2023 "Psychology of Money"
+   entry, for instance, has an unofficial summary book's cover attached. No
+   heuristic can out-argue bad upstream data, so cover-overrides.json always
+   wins and gives a permanent escape hatch. */
+function loadOverrides() {
+  try {
+    const raw = JSON.parse(fs.readFileSync(OVERRIDES_PATH, "utf8"));
+    delete raw._readme;
+    return raw;
+  } catch (e) {
+    return {};
+  }
+}
+
+async function fetchOverride(value, dest) {
+  if (typeof value === "number" || /^[0-9]+$/.test(String(value))) {
+    return fetchImage("https://covers.openlibrary.org/b/id/" + value + "-M.jpg?default=false");
+  }
+  const s = String(value);
+  if (/^https?:/i.test(s)) return fetchImage(s);
+  const local = path.isAbsolute(s) ? s : path.join(__dirname, s);
+  return fs.existsSync(local) ? fs.readFileSync(local) : null;
+}
+
+/* Find real artwork for one book, most-exact source first:
+     1. ISBN13, 2. ISBN10  -> the reader's own edition, so it wins outright
+     3. work -> English editions -> best of a few candidates
+   English candidates arrive newest-edition-first, so the first one that
+   downloads is the cover a reader would recognise. Anything not found falls
+   through to a generated cover. */
 async function fetchCover(book, slug) {
   const dest = path.join(COVERS_DIR, slug + ".jpg");
   const rel = COVERS_REL + "/" + slug + ".jpg";
 
   if (fs.existsSync(dest)) return rel; // already have it — be kind to Open Library
+
+  const pinned = OVERRIDES[book.title];
+  if (pinned !== undefined) {
+    try {
+      const buf = await fetchOverride(pinned, dest);
+      if (buf) { fs.mkdirSync(COVERS_DIR, { recursive: true }); fs.writeFileSync(dest, buf); return rel; }
+      console.warn("  ! override for " + book.title + " could not be loaded: " + pinned);
+    } catch (e) {
+      console.warn("  ! override for " + book.title + " failed: " + e.message);
+    }
+  }
+
   if (SKIP_COVERS || typeof fetch !== "function") return null;
 
   try {
     for (const isbn of book._isbns || []) {
-      if (await download("https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg?default=false", dest)) {
-        return rel;
-      }
+      const buf = await fetchImage("https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg?default=false");
+      if (buf) { fs.mkdirSync(COVERS_DIR, { recursive: true }); fs.writeFileSync(dest, buf); return rel; }
     }
-    const id = await findCoverId(book.title, book.author);
-    if (id && await download("https://covers.openlibrary.org/b/id/" + id + "-M.jpg?default=false", dest)) {
-      return rel;
+
+    const workKey = await findWorkKey(book.title, book.author);
+    if (workKey) {
+      const ids = await englishCoverIds(workKey);
+      for (const id of ids) {
+        const buf = await fetchImage("https://covers.openlibrary.org/b/id/" + id + "-M.jpg?default=false");
+        if (buf) { fs.mkdirSync(COVERS_DIR, { recursive: true }); fs.writeFileSync(dest, buf); return rel; }
+      }
     }
   } catch (e) {
     // A lookup failure must never break the build, but stay loud about it so
@@ -423,6 +514,45 @@ async function fetchCovers(books) {
   return { found: found, drawn: drawn };
 }
 
+/* --audit writes a local, throwaway HTML sheet of every cover next to its
+   title so a wrong image is obvious at a glance. Open Library is community
+   catalogued and occasionally files the wrong artwork under a correct edition,
+   which no heuristic can detect — a 10-second eyeball can. The sheet lives in
+   .covaudit/ (git-ignored) and never ships. */
+function writeAudit(books) {
+  const rows = books.map(function (b, i) {
+    const src = b.cover ? "../" + b.cover : "";
+    const art = b.cover && /\.svg$/.test(b.cover) ? " (generated)" : "";
+    return (
+      '<figure>' +
+      (src ? '<img src="' + escapeXML(src) + '" alt="" loading="lazy">' : '<div class="none"></div>') +
+      '<figcaption><b>' + (i + 1) + '.</b> ' + escapeXML(b.title) +
+      '<span>' + escapeXML(b.author) + art + '</span></figcaption></figure>'
+    );
+  }).join("\n");
+
+  const html = '<!DOCTYPE html><meta charset="utf-8"><title>Cover audit</title>' +
+    '<style>body{font:14px system-ui;margin:24px;background:#fff;color:#1d1d1f}' +
+    'h1{font-size:20px}p{color:#6e6e73}' +
+    '.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px}' +
+    'figure{margin:0}img,.none{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;' +
+    'background:#f5f5f7;border:1px solid #e5e5ea}' +
+    'figcaption{font-size:12px;margin-top:6px;line-height:1.35}' +
+    'figcaption span{display:block;color:#6e6e73}</style>' +
+    '<h1>Cover audit &mdash; ' + books.length + ' books</h1>' +
+    '<p>Check each cover against its title and author. To fix one, add it to ' +
+    'cover-overrides.json and re-run <code>node build-books.js</code>.</p>' +
+    '<div class="g">' + rows + '</div>\n';
+
+  const dir = path.join(__dirname, ".covaudit");
+  fs.mkdirSync(dir, { recursive: true });
+  const out = path.join(dir, "audit.html");
+  fs.writeFileSync(out, html, "utf8");
+  console.log("Audit sheet: " + out);
+}
+
+const OVERRIDES = loadOverrides();
+
 async function main() {
   let books;
   let source;
@@ -446,6 +576,8 @@ async function main() {
     covers.found + " real" + (SKIP_COVERS ? " (lookups skipped)" : "") +
     ", " + covers.drawn + " generated."
   );
+
+  if (AUDIT) writeAudit(books);
 }
 
 main();

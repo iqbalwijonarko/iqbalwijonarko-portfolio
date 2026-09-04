@@ -104,13 +104,15 @@ node build-books.js
 
 It reads the CSV, keeps only the fields the page needs (title, author, rating, shelf, date/year read, pages), fetches book covers (see below), and writes `books.json`. If no CSV is present it writes a small **sample** `books.json` instead, so the page always renders. `build-books.js` is a local tool — it is never loaded by the browser.
 
-**3. Covers are automatic (fetched at build time, not at page load)** — the Goodreads export has no cover URLs, so the build script looks each book up by ISBN in the free [Open Library Covers API](https://openlibrary.org/dev/docs/api/covers) and downloads the image **once** into `assets/books/`. The site then serves those as **local static files**, lazy-loaded with fixed dimensions — so there are no third-party requests when a visitor loads the page, and no hit to performance, SEO, or hosting cost (the covers total only a few hundred KB). Books with no ISBN, or with no cover on Open Library, keep a tasteful text placeholder tile automatically.
+**3. Every book gets a cover, automatically (at build time, not at page load)** — the Goodreads export has no cover URLs, so the build script resolves each one against the free [Open Library](https://openlibrary.org/dev/docs/api/covers) API and downloads the image **once** into `assets/books/`. It tries, in order: the book's ISBNs; then the Open Library *work*, reading **edition-level** data so it picks an **English** edition and prefers the **newest** printing (this is what keeps a French reprint or a 1950s cover from winning). If nothing is found, it draws a small SVG cover from the title and author, so the grid is never ragged. The site serves all of it as **local static files**, lazy-loaded with fixed dimensions — no third-party requests on page load, and no hit to performance, SEO, or hosting cost (the whole set is under 500 KB).
 
 - Re-running is safe: already-downloaded covers are reused (Open Library isn't re-hit).
 - Offline? Run `node build-books.js --no-covers` to skip the network; any covers already on disk are still linked.
-- To override a cover by hand, drop your own image in `assets/books/` and set that book's `"cover"` path in `books.json`. `books.sample.json` is a checked-in reference of the schema.
+- **Check the result after every update:** `node build-books.js --audit` also writes `.covaudit/audit.html`, a local sheet of every cover beside its title and author. Open it and skim — a wrong image is obvious in seconds. The sheet is git-ignored and never ships.
+- **Fixing a wrong cover:** Open Library is community-catalogued, so an edition record occasionally has the wrong artwork attached (a "summary" book filed under the real title, for instance). No heuristic can detect that, so add the book to **`cover-overrides.json`** — key is the exact title from `books.json`, value is an Open Library cover id, an image URL, or a local file path — then re-run the build. An override always wins, and it survives future rebuilds.
+- `books.sample.json` is a checked-in reference of the schema.
 
-**Deploying** — `bookshelf.html`, `bookshelf.js`, `books.json`, and the `assets/books/` covers are flat files like everything else: commit and push (GitHub Pages) or upload them over SFTP to IONOS, the same way you deploy the rest of the site. `build-books.js` and the raw CSV stay local and are not uploaded.
+**Deploying** — `bookshelf.html`, `bookshelf.js`, `books.json`, and the `assets/books/` covers are flat files like everything else: commit and push (GitHub Pages) or upload them over SFTP to IONOS, the same way you deploy the rest of the site. `build-books.js`, `cover-overrides.json`, and the raw CSV stay local and are not uploaded.
 
 </details>
 

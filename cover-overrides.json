@@ -1,0 +1,15 @@
+{
+  "_readme": [
+    "Pin a book's cover when the automatic lookup gets it wrong.",
+    "Open Library is community-catalogued, so an edition record occasionally has",
+    "the wrong image attached (e.g. an unofficial 'summary' book's cover filed",
+    "under the real title). An entry here always wins over the lookup.",
+    "",
+    "Key   = the book's exact title as it appears in books.json",
+    "Value = an Open Library cover id (number), an image URL, or a local file path",
+    "",
+    "After editing, re-run: node build-books.js",
+    "Then review every cover with: node build-books.js --audit"
+  ],
+  "The Psychology of Money: Timeless Lessons on Wealth, Greed, and Happiness": 15215448
+}

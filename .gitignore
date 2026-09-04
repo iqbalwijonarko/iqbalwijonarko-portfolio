@@ -7,3 +7,6 @@
 
 # Goodreads export — local input to build-books.js; the shipped file is books.json
 goodreads_library_export.csv
+
+# Local cover-audit sheet written by `node build-books.js --audit`
+.covaudit/
