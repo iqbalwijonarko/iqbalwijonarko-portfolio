@@ -88,14 +88,17 @@ section {
   height: auto;
   display: block;
   border-radius: 20px; /* rounded corners (the new photo isn't pre-rounded) */
-  /* drop-shadow (not box-shadow) so the shadow follows the photo's actual
-     shape, not the transparent rectangular padding baked into the PNG. */
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.16));
+  /* Keep the photo sharp while it tilts. box-shadow — not filter:drop-shadow —
+     because a filter forces the browser to rasterize the image into a texture,
+     and `will-change`/`backface-visibility` pinned that texture at its base
+     size, so tilting/scaling resampled a low-res snapshot (the blur on hover).
+     The old PNG needed drop-shadow to trace its baked-in transparent corners;
+     this photo is opaque with CSS rounded corners, so box-shadow traces the
+     exact same rounded shape with no rasterization. */
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
   transform: perspective(900px) rotateX(0deg) rotateY(0deg) scale(1);
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-              filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, filter;
-  backface-visibility: hidden;
+              box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .about-eyebrow {
