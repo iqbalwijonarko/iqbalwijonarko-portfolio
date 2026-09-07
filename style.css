@@ -99,6 +99,9 @@ section {
   transform: perspective(900px) rotateX(0deg) rotateY(0deg) scale(1);
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  /* grab-to-rotate: don't let the browser text-select or ghost-drag the image */
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .about-eyebrow {
@@ -304,7 +307,8 @@ mark.is-visible {
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(210, 210, 215, 0.72);
+  /* Apple paddlenav grays */
+  background: rgba(210, 210, 215, 0.64);
   color: rgba(0, 0, 0, 0.56);
   display: inline-flex;
   align-items: center;
@@ -315,7 +319,7 @@ mark.is-visible {
 }
 
 .carousel-btn:hover {
-  background: rgba(210, 210, 215, 1);
+  background: rgba(210, 210, 215, 0.9);
   color: rgba(0, 0, 0, 0.72);
 }
 
@@ -329,8 +333,8 @@ mark.is-visible {
 }
 
 .carousel-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 34px;
+  height: 34px;
 }
 
 /* Experience & Education cards */

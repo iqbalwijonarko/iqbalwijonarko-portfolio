@@ -38,12 +38,14 @@ async function init() {
    below every .card-grid; scrolls one card per click and disables at each end.
    Hidden on desktop via CSS (the grid isn't a scroller there). */
 function setupCarouselControls() {
-  const CHEVRON_LEFT =
-    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" ' +
-    'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  // Apple's exact paddlenav chevron: a filled path in a 36x36 viewBox (not a
+  // stroked line). The left arrow is the same path mirrored within the viewBox.
+  const APPLE_CHEVRON =
+    "m22.5597 16.9375-5.5076-5.5c-.5854-.5854-1.5323-.5825-2.1157.0039-.5835.5869-.5815 1.5366.0039 2.1211l4.4438 4.4375-4.4438 4.4375c-.5854.5845-.5874 1.5342-.0039 2.1211.2922.2944.676.4414 1.0598.4414.3818 0 .7637-.1455 1.0559-.4375l5.5076-5.5c.2815-.2812.4403-.6636.4403-1.0625s-.1588-.7812-.4403-1.0625z";
   const CHEVRON_RIGHT =
-    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 6l6 6-6 6" ' +
-    'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    '<svg viewBox="0 0 36 36" fill="currentColor" aria-hidden="true"><path d="' + APPLE_CHEVRON + '"/></svg>';
+  const CHEVRON_LEFT =
+    '<svg viewBox="0 0 36 36" fill="currentColor" aria-hidden="true"><path transform="translate(36 0) scale(-1 1)" d="' + APPLE_CHEVRON + '"/></svg>';
 
   document.querySelectorAll(".card-grid").forEach(function (grid) {
     const nav = document.createElement("div");
@@ -76,7 +78,7 @@ function setupCarouselControls() {
       const idx = Math.round(grid.scrollLeft / s);
       const target = Math.max(0, Math.min((idx + dir) * s, max));
       if (reduce) { grid.scrollLeft = target; update(); }
-      else easeScrollLeft(grid, target, 480, update);
+      else easeScrollLeft(grid, target, 560, update);
     }
     prev.addEventListener("click", function () { go(-1); });
     next.addEventListener("click", function () { go(1); });
@@ -223,8 +225,10 @@ function setupPhotoTilt() {
   const canHover = mq && mq("(hover: hover) and (pointer: fine)").matches;
   if (reduce || !canHover) return;
 
-  const MAX = 6;      // max tilt, degrees
-  const SCALE = 1.02; // subtle grow
+  // Cursor-follow tilt: hover the photo and it leans toward the pointer in 3D,
+  // easing back to rest when the cursor leaves. Mouse only (guarded above).
+  const MAX = 15;     // max tilt per axis, degrees
+  const SCALE = 1.03; // subtle lift on hover
 
   wrap.addEventListener("pointerenter", function () {
     img.style.transition = "transform 0.12s ease-out, box-shadow 0.12s ease-out";
@@ -239,13 +243,10 @@ function setupPhotoTilt() {
     img.style.transform =
       "perspective(900px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) +
       "deg) scale(" + SCALE + ")";
-    // box-shadow (not a filter, which would rasterize and soften the photo);
-    // offset opposite the tilt for a light-source feel. Rounded corners come
-    // from border-radius, so the shadow follows the photo's shape.
-    const sx = -(px - 0.5) * 16;
-    const sy = -(py - 0.5) * 16;
+    // shadow shifts opposite the tilt for a light-source feel
     img.style.boxShadow =
-      sx.toFixed(0) + "px " + (sy + 12).toFixed(0) + "px 22px rgba(0, 0, 0, 0.26)";
+      (-(px - 0.5) * 16).toFixed(0) + "px " + (12 - (py - 0.5) * 16).toFixed(0) +
+      "px 22px rgba(0, 0, 0, 0.26)";
   });
 
   wrap.addEventListener("pointerleave", function () {
