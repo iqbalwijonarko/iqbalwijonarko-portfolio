@@ -1128,10 +1128,17 @@ body:has(.posts-region.is-wip) .container {
   font-weight: 600;
 }
 
-/* Apple's blue ring: appears on the tab you select (it takes focus on click)
-   and disappears as soon as focus moves — i.e. when you click anything else.
-   :focus, not :focus-visible, so it shows for mouse clicks too. */
-#book-filters .filter-pill:focus {
+/* Apple's blue ring rides the sliding pill (so it always hugs the dark
+   indicator and travels with it), but only while the filter group has focus —
+   so it appears when you pick a tab and clears when you click anything else. */
+#book-filters:focus-within .tabnav-indicator {
+  outline: 3px solid rgba(0, 125, 250, 0.6);
+  outline-offset: 2px;
+}
+
+/* Keyboard users tabbing onto a tab that isn't the selected one still get a
+   focus indicator (the pill's ring only marks the selected tab). */
+#book-filters .filter-pill:not(.filter-pill--active):focus-visible {
   outline: 3px solid rgba(0, 125, 250, 0.6);
   outline-offset: 2px;
   border-radius: 980px;
