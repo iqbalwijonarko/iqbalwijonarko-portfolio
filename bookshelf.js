@@ -181,6 +181,9 @@ function renderShelfFilters() {
   const buttons = Array.prototype.slice.call(wrap.querySelectorAll(".filter-pill"));
   buttons.forEach(function (btn) {
     btn.addEventListener("click", function () {
+      // Focus the tab so it shows the blue ring (Safari doesn't focus buttons
+      // on click). The ring clears on its own once focus moves elsewhere.
+      btn.focus();
       if (btn.getAttribute("data-shelf") === activeShelf) return;
       activeShelf = btn.getAttribute("data-shelf");
       buttons.forEach(function (b) {
