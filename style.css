@@ -1073,6 +1073,74 @@ body:has(.posts-region.is-wip) .container {
   margin-bottom: 0;
 }
 
+/* ===== Shelf filter: Apple "tabnav-elevated" segmented control =====
+   A rounded gray platter with a white pill that slides behind the active tab.
+   Scoped to #book-filters so the blog's separate pills are untouched. */
+#book-filters {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: 980px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+#book-filters .tabnav-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: var(--ind-w, 0);
+  transform: translateX(var(--ind-x, 0));
+  background: #fff;
+  border-radius: 980px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+#book-filters .filter-pill {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  border: none;
+  border-radius: 980px;
+  padding: 8px 16px;
+  white-space: nowrap;
+  color: #6e6e73;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+#book-filters .filter-pill:hover {
+  background: transparent;
+  color: #1d1d1f;
+}
+
+#book-filters .filter-pill--active {
+  background: transparent;
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+#book-filters .filter-count {
+  opacity: 0.5;
+  font-weight: 500;
+}
+
+/* On phones the three labels are wide; tighten so they fit inside the platter
+   without overflowing (rather than clipping or scrolling). */
+@media (max-width: 440px) {
+  #book-filters .filter-pill {
+    padding: 7px 11px;
+    font-size: 0.8rem;
+  }
+}
+
 .book-sort {
   display: inline-flex;
   align-items: center;

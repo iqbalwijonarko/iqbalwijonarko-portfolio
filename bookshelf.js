@@ -161,24 +161,52 @@ function renderShelfFilters() {
     { key: "currently-reading", label: "Currently reading" }
   ];
 
-  const html = shelves.map(function (s) {
-    const active = s.key === activeShelf ? " filter-pill--active" : "";
-    return (
-      '<button type="button" class="filter-pill' + active + '" data-shelf="' + s.key + '">' +
-        escapeHTML(s.label) + ' <span class="filter-count">(' + (counts[s.key] || 0) + ")</span>" +
-      "</button>"
-    );
-  }).join("");
-
   const wrap = document.getElementById("book-filters");
-  wrap.innerHTML = html;
-  wrap.querySelectorAll(".filter-pill").forEach(function (btn) {
+
+  // Apple "tabnav-elevated" segmented control: one platter, a white indicator
+  // pill, and the tab buttons. Built ONCE so clicks just slide the pill and
+  // toggle the active tab (no re-render, so the indicator can animate).
+  wrap.innerHTML =
+    '<span class="tabnav-indicator" aria-hidden="true"></span>' +
+    shelves.map(function (s) {
+      const on = s.key === activeShelf;
+      return (
+        '<button type="button" class="filter-pill' + (on ? " filter-pill--active" : "") +
+          '" role="tab" aria-selected="' + on + '" data-shelf="' + s.key + '">' +
+          escapeHTML(s.label) + ' <span class="filter-count">(' + (counts[s.key] || 0) + ")</span>" +
+        "</button>"
+      );
+    }).join("");
+
+  const buttons = Array.prototype.slice.call(wrap.querySelectorAll(".filter-pill"));
+  buttons.forEach(function (btn) {
     btn.addEventListener("click", function () {
+      if (btn.getAttribute("data-shelf") === activeShelf) return;
       activeShelf = btn.getAttribute("data-shelf");
-      renderShelfFilters();
+      buttons.forEach(function (b) {
+        const isOn = b === btn;
+        b.classList.toggle("filter-pill--active", isOn);
+        b.setAttribute("aria-selected", isOn);
+      });
+      moveShelfIndicator();
       renderBooks();
     });
   });
+
+  moveShelfIndicator();
+  // Button widths shift once the web font loads and on resize — keep aligned.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveShelfIndicator);
+  window.addEventListener("resize", moveShelfIndicator);
+}
+
+// Slide the white pill to sit exactly behind the active tab.
+function moveShelfIndicator() {
+  const wrap = document.getElementById("book-filters");
+  if (!wrap) return;
+  const active = wrap.querySelector(".filter-pill--active");
+  if (!active) return;
+  wrap.style.setProperty("--ind-x", active.offsetLeft + "px");
+  wrap.style.setProperty("--ind-w", active.offsetWidth + "px");
 }
 
 function renderBooks() {
