@@ -1115,7 +1115,9 @@ body:has(.posts-region.is-wip) .container {
   transition: color 0.2s ease;
 }
 
-#book-filters .filter-pill:hover {
+/* Only INACTIVE labels darken on hover. The selected one must keep its white
+   text — otherwise hovering it turns the label dark on the dark pill. */
+#book-filters .filter-pill:not(.filter-pill--active):hover {
   background: transparent;
   color: #1d1d1f;
 }
@@ -1126,7 +1128,8 @@ body:has(.posts-region.is-wip) .container {
   font-weight: 600;
 }
 
-/* Apple's blue focus ring, shown on keyboard focus (same as their tabnav). */
+/* Apple's blue ring — on hover as well as keyboard focus. */
+#book-filters .filter-pill:hover,
 #book-filters .filter-pill:focus-visible {
   outline: 3px solid rgba(0, 125, 250, 0.6);
   outline-offset: 2px;
