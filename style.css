@@ -1097,6 +1097,10 @@ body:has(.posts-region.is-wip) .container {
   transform: translateX(var(--ind-x, 0));
   background: #1d1d1f;
   border-radius: 980px;
+  /* Apple's blue ring marks the SELECTED tab. It rides on the indicator so it
+     always hugs the dark pill and slides with it. */
+  outline: 3px solid rgba(0, 125, 250, 0.6);
+  outline-offset: 2px;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
@@ -1128,8 +1132,8 @@ body:has(.posts-region.is-wip) .container {
   font-weight: 600;
 }
 
-/* Apple's blue ring — on hover as well as keyboard focus. */
-#book-filters .filter-pill:hover,
+/* Keyboard focus indicator for tabs other than the selected one (a11y).
+   The selected tab's blue ring lives on the sliding indicator below. */
 #book-filters .filter-pill:focus-visible {
   outline: 3px solid rgba(0, 125, 250, 0.6);
   outline-offset: 2px;
