@@ -289,15 +289,68 @@ mark.is-visible {
 }
 
 /* ===== Card grids (Experience / Education / Projects) ===== */
+/* One horizontal snap carousel at every width, rather than a wrapping 3-up
+   grid on desktop and a carousel on phones. Five cards stay on a single
+   scrollable row instead of spilling into a ragged second row, and there is a
+   single interaction model to reason about. The ≤600px block below only
+   retunes spacing and card width for a phone. */
 .card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 6px 0 10px; /* room for the card shadow and hover lift */
+  /* Soften the edges so a half-visible card dissolves instead of being sliced
+     by the container edge. A mask beats an overlay gradient here: it needs no
+     extra element and does not assume the page background is white, so it
+     still works if the section ever sits on a tint. The two custom properties
+     are driven from JS, which sets an edge only on the side that actually has
+     more content, so the first and last card never fade for no reason. */
+  --edge-l: 0px;
+  --edge-r: 0px;
+  -webkit-mask-image: linear-gradient(to right,
+    transparent 0, #000 var(--edge-l),
+    #000 calc(100% - var(--edge-r)), transparent 100%);
+  mask-image: linear-gradient(to right,
+    transparent 0, #000 var(--edge-l),
+    #000 calc(100% - var(--edge-r)), transparent 100%);
+  transition: -webkit-mask-image 0.25s ease, mask-image 0.25s ease;
 }
 
-/* Carousel prev/next controls — only shown on mobile (see the ≤600px block),
-   where the grids become swipeable carousels. Apple-style circular buttons. */
+.card-grid::-webkit-scrollbar {
+  display: none;
+}
+
+/* Sized so three cards plus their gaps fall just short of the row, leaving the
+   fourth partly visible. That peek is the cue that the row continues, and
+   because it is a percentage of the container it can never push the page into
+   horizontal scroll the way a viewport-width bleed does. */
+.card-grid > * {
+  flex: 0 0 28.5%;
+  scroll-snap-align: start;
+}
+
+/* The page-wide reveal slides elements down 18px. A transformed child counts
+   toward its scroller's overflow, so inside a carousel that becomes vertical
+   scroll range. Fade the cards in without the rise. */
+.card-grid > .reveal {
+  transform: none;
+}
+
+/* Apple-style circular paddle controls, right-aligned under the row. */
 .carousel-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* display:flex above outranks the browser's [hidden]{display:none}, so without
+   this the JS setting nav.hidden would have no visible effect. */
+.carousel-nav[hidden] {
   display: none;
 }
 
@@ -521,54 +574,23 @@ mark.is-visible {
   /* Experience / Education / Projects become an Apple-style horizontal snap
      carousel on phones: full-bleed edge-to-edge, swipeable, one card in focus
      per snap with the next card peeking. No scrollbar; the peek is the cue. */
+  /* The carousel itself is defined once up top; a phone only needs a tighter
+     gap, one card per snap, and a full-bleed row so cards run to the screen
+     edge while the first still lines up under the heading. */
   .card-grid {
-    display: flex;
-    grid-template-columns: none;
     gap: 14px;
-    overflow-x: auto;
-    /* Lock the swipe to one axis. Setting only overflow-x makes the other axis
-       compute to auto, so the sub-pixel card height (207.03px) left ~2px of
-       phantom vertical scroll and a swipe could drag the cards diagonally.
-       Clipping y removes the vertical scroll container, so a vertical swipe
-       scrolls the page instead of nudging the row, and contain keeps a
-       horizontal fling from chaining out to the page or the back gesture. */
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    /* bleed to the screen edges, then re-pad so the first card lines up under
-       the section heading and there's room for card shadow + hover lift */
     margin: 0 -26px;
     padding: 6px 26px 16px;
     scroll-padding-left: 26px;
   }
 
-  .card-grid::-webkit-scrollbar {
-    display: none;
-  }
-
   .card-grid > * {
     flex: 0 0 80%;
-    scroll-snap-align: start;
     scroll-snap-stop: always;
   }
 
-  /* Carousel cards fade in without the 18px rise the rest of the page uses.
-     A transformed child still counts toward its scroller's overflow, so the
-     rise was pushing real vertical scroll range into the row before the cards
-     revealed. Removing it here kills that at the source; overflow-y above is
-     the backstop. Specificity beats the later .reveal rule, and the fade is
-     untouched. */
-  .card-grid > .reveal {
-    transform: none;
-  }
-
-  /* Show the prev/next controls, right-aligned under the carousel */
   .carousel-nav {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
     margin-top: 16px;
   }
 

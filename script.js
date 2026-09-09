@@ -34,10 +34,13 @@ async function init() {
   setupCarouselControls();
 }
 
-/* Apple-style prev/next buttons under each mobile carousel. Adds a control pair
-   below every .card-grid; scrolls one card per click and disables at each end.
-   Hidden on desktop via CSS (the grid isn't a scroller there). */
+/* Apple-style prev/next buttons under each carousel. Adds a control pair below
+   every .card-grid; scrolls one card per click and disables at each end. The
+   pair hides itself when there is nothing to page through, and on desktop also
+   for rows of three or fewer, which are fully visible already. Also drives the
+   soft edge fade, since it already tracks scroll position. */
 function setupCarouselControls() {
+  const EDGE_FADE = "44px"; // width of the soft edge on a side that scrolls
   // Apple's exact paddlenav chevron: a filled path in a 36x36 viewBox (not a
   // stroked line). The left arrow is the same path mirrored within the viewBox.
   const APPLE_CHEVRON =
@@ -65,10 +68,23 @@ function setupCarouselControls() {
       return card ? card.getBoundingClientRect().width + gap : grid.clientWidth * 0.8;
     }
 
+    const desktop = window.matchMedia("(min-width: 601px)");
+
     function update() {
       const max = grid.scrollWidth - grid.clientWidth;
+      // A row that fits entirely has nothing to page through, so the controls
+      // would just sit there permanently greyed out. Hide them instead.
+      // On desktop also hide them for rows of three or fewer, where the whole
+      // row reads at a glance and paddles are decoration. Mobile keeps them:
+      // there even two cards overflow a phone screen.
+      nav.hidden = max <= 2 || (desktop.matches && grid.children.length <= 3);
       prev.disabled = grid.scrollLeft <= 2;
       next.disabled = grid.scrollLeft >= max - 2;
+      // Fade only the edge that has more content behind it, so the first and
+      // last card meet the edge crisply the way Apple's galleries do.
+      const edge = max > 2 ? EDGE_FADE : "0px";
+      grid.style.setProperty("--edge-l", grid.scrollLeft > 2 ? edge : "0px");
+      grid.style.setProperty("--edge-r", grid.scrollLeft < max - 2 ? edge : "0px");
     }
 
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
