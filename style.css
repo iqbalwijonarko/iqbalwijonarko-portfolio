@@ -526,6 +526,14 @@ mark.is-visible {
     grid-template-columns: none;
     gap: 14px;
     overflow-x: auto;
+    /* Lock the swipe to one axis. Setting only overflow-x makes the other axis
+       compute to auto, so the sub-pixel card height (207.03px) left ~2px of
+       phantom vertical scroll and a swipe could drag the cards diagonally.
+       Clipping y removes the vertical scroll container, so a vertical swipe
+       scrolls the page instead of nudging the row, and contain keeps a
+       horizontal fling from chaining out to the page or the back gesture. */
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -544,6 +552,16 @@ mark.is-visible {
     flex: 0 0 80%;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+  }
+
+  /* Carousel cards fade in without the 18px rise the rest of the page uses.
+     A transformed child still counts toward its scroller's overflow, so the
+     rise was pushing real vertical scroll range into the row before the cards
+     revealed. Removing it here kills that at the source; overflow-y above is
+     the backstop. Specificity beats the later .reveal rule, and the fade is
+     untouched. */
+  .card-grid > .reveal {
+    transform: none;
   }
 
   /* Show the prev/next controls, right-aligned under the carousel */
