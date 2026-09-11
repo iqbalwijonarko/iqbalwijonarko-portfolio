@@ -40,7 +40,7 @@ async function init() {
    for rows of three or fewer, which are fully visible already. Also drives the
    soft edge fade, since it already tracks scroll position. */
 function setupCarouselControls() {
-  const EDGE_FADE = "44px"; // width of the soft edge on a side that scrolls
+  const EDGE_FADE = "20px"; // width of the soft edge on a side that scrolls (subtle)
   // Apple's exact paddlenav chevron: a filled path in a 36x36 viewBox (not a
   // stroked line). The left arrow is the same path mirrored within the viewBox.
   const APPLE_CHEVRON =
