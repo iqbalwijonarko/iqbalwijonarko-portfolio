@@ -40,9 +40,7 @@ async function init() {
    for rows of three or fewer, which are fully visible already. Also drives the
    soft edge fade, since it already tracks scroll position. */
 function setupCarouselControls() {
-  const EDGE_FADE = "20px"; // width of the soft edge on a side that scrolls (subtle)
-  // Apple's exact paddlenav chevron: a filled path in a 36x36 viewBox (not a
-  // stroked line). The left arrow is the same path mirrored within the viewBox.
+  // Apple's exact paddlenav chevron: a filled path in a 36x36 viewBox.
   const APPLE_CHEVRON =
     "m22.5597 16.9375-5.5076-5.5c-.5854-.5854-1.5323-.5825-2.1157.0039-.5835.5869-.5815 1.5366.0039 2.1211l4.4438 4.4375-4.4438 4.4375c-.5854.5845-.5874 1.5342-.0039 2.1211.2922.2944.676.4414 1.0598.4414.3818 0 .7637-.1455 1.0559-.4375l5.5076-5.5c.2815-.2812.4403-.6636.4403-1.0625s-.1588-.7812-.4403-1.0625z";
   const CHEVRON_RIGHT =
@@ -51,54 +49,90 @@ function setupCarouselControls() {
     '<svg viewBox="0 0 36 36" fill="currentColor" aria-hidden="true"><path transform="translate(36 0) scale(-1 1)" d="' + APPLE_CHEVRON + '"/></svg>';
 
   document.querySelectorAll(".card-grid").forEach(function (grid) {
+    // Wrap the scroller so the edge-fade overlay can pin to the visible edges.
+    const viewport = document.createElement("div");
+    viewport.className = "card-viewport";
+    grid.parentNode.insertBefore(viewport, grid);
+    viewport.appendChild(grid);
+
     const nav = document.createElement("div");
     nav.className = "carousel-nav";
-    nav.setAttribute("aria-hidden", "true"); // swiping is the primary control; buttons are an aid
+    nav.setAttribute("aria-hidden", "true"); // swiping is primary; paddles are an aid
+    // tabindex=-1 keeps focusable buttons OUT of the aria-hidden subtree; every
+    // card stays reachable via its link + native focus-scroll.
     nav.innerHTML =
-      '<button type="button" class="carousel-btn" data-dir="prev" aria-label="Previous">' + CHEVRON_LEFT + "</button>" +
-      '<button type="button" class="carousel-btn" data-dir="next" aria-label="Next">' + CHEVRON_RIGHT + "</button>";
-    grid.insertAdjacentElement("afterend", nav);
+      '<button type="button" class="carousel-btn" data-dir="prev" aria-label="Previous" tabindex="-1">' + CHEVRON_LEFT + "</button>" +
+      '<button type="button" class="carousel-btn" data-dir="next" aria-label="Next" tabindex="-1">' + CHEVRON_RIGHT + "</button>";
+    viewport.insertAdjacentElement("afterend", nav);
 
     const prev = nav.querySelector('[data-dir="prev"]');
     const next = nav.querySelector('[data-dir="next"]');
-
-    function step() {
-      const card = grid.firstElementChild;
-      const gap = parseFloat(getComputedStyle(grid).columnGap) || 14;
-      return card ? card.getBoundingClientRect().width + gap : grid.clientWidth * 0.8;
-    }
-
     const desktop = window.matchMedia("(min-width: 601px)");
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let tween = null; // in-flight paddle animation for this grid
+
+    function cancelTween() {
+      if (tween) { tween.cancel(); tween = null; }
+    }
 
     function update() {
       const max = grid.scrollWidth - grid.clientWidth;
-      // A row that fits entirely has nothing to page through, so the controls
-      // would just sit there permanently greyed out. Hide them instead.
-      // On desktop also hide them for rows of three or fewer, where the whole
-      // row reads at a glance and paddles are decoration. Mobile keeps them:
-      // there even two cards overflow a phone screen.
       nav.hidden = max <= 2 || (desktop.matches && grid.children.length <= 3);
       prev.disabled = grid.scrollLeft <= 2;
       next.disabled = grid.scrollLeft >= max - 2;
-      // Fade only the edge that has more content behind it, so the first and
-      // last card meet the edge crisply the way Apple's galleries do.
-      const edge = max > 2 ? EDGE_FADE : "0px";
-      grid.style.setProperty("--edge-l", grid.scrollLeft > 2 ? edge : "0px");
-      grid.style.setProperty("--edge-r", grid.scrollLeft < max - 2 ? edge : "0px");
+      // Edge fade: a class toggle on the wrapper (compositor-only opacity), not
+      // a per-frame style write on the scroller.
+      const scrollable = max > 2;
+      viewport.classList.toggle("is-fade-start", scrollable && grid.scrollLeft > 2);
+      viewport.classList.toggle("is-fade-end", scrollable && grid.scrollLeft < max - 2);
     }
 
-    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Snap-accurate paddle target: scroll to the next/prev card's MEASURED offset
+    // (not idx*step), so it lands exactly on a snap point and restoring snap at
+    // the end is a no-op -- no end-of-animation twitch. The direction scan also
+    // advances correctly on rapid mid-tween clicks.
     function go(dir) {
-      const s = step();
+      cancelTween();
+      const kids = grid.children;
+      if (!kids.length) return;
       const max = grid.scrollWidth - grid.clientWidth;
-      const idx = Math.round(grid.scrollLeft / s);
-      const target = Math.max(0, Math.min((idx + dir) * s, max));
+      const pad = parseFloat(getComputedStyle(grid).scrollPaddingLeft) || 0;
+      const originLeft = grid.getBoundingClientRect().left + pad;
+      let target = null;
+      if (dir > 0) {
+        for (let i = 0; i < kids.length; i++) {
+          const rel = kids[i].getBoundingClientRect().left - originLeft;
+          if (rel > 4) { target = grid.scrollLeft + rel; break; }
+        }
+        if (target === null) target = max;
+      } else {
+        for (let i = kids.length - 1; i >= 0; i--) {
+          const rel = kids[i].getBoundingClientRect().left - originLeft;
+          if (rel < -4) { target = grid.scrollLeft + rel; break; }
+        }
+        if (target === null) target = 0;
+      }
+      target = Math.max(0, Math.min(target, max));
       if (reduce) { grid.scrollLeft = target; update(); }
-      else easeScrollLeft(grid, target, 560, update);
+      else { tween = easeScrollLeft(grid, target, 420, function () { tween = null; update(); }); }
     }
+
     prev.addEventListener("click", function () { go(-1); });
     next.addEventListener("click", function () { go(1); });
 
+    // Cancel-on-input: any native scroll intent aborts the JS tween so per-frame
+    // scrollLeft writes never fight the user. Wheel is guarded to HORIZONTAL
+    // intent so a vertical page-scroll passing over the row won't abort a tween.
+    grid.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) cancelTween();
+    }, { passive: true });
+    ["touchstart", "pointerdown", "keydown"].forEach(function (ev) {
+      grid.addEventListener(ev, cancelTween, { passive: true });
+    });
+    grid.addEventListener("focusin", cancelTween); // Tab-to-card scroll-into-view
+
+    // KEEP: passive + single-rAF throttled scroll handler (no layout/style mix).
     let ticking = false;
     grid.addEventListener("scroll", function () {
       if (!ticking) { window.requestAnimationFrame(function () { update(); ticking = false; }); ticking = true; }
@@ -109,29 +143,43 @@ function setupCarouselControls() {
   });
 }
 
-/* Buttery eased horizontal scroll for the carousel buttons (easeInOutCubic).
-   Snap is momentarily lifted during the animation so the browser's mandatory
-   snap doesn't fight the tween, then restored to hold the card in place. */
+/* Ease-OUT paddle tween (fast start, gentle settle) at ~420ms. Snap is lifted
+   during the tween and restored at the end; because the target is a real snap
+   offset, restoring snap does not move the row. Returns an abortable handle so a
+   native input can cancel it mid-flight and hand control back to the browser. */
 function easeScrollLeft(el, target, duration, done) {
   const start = el.scrollLeft;
   const delta = target - start;
-  if (Math.abs(delta) < 1) { if (done) done(); return; }
   const prevSnap = el.style.scrollSnapType;
-  el.style.scrollSnapType = "none";
+  const handle = {
+    rafId: 0,
+    cancelled: false,
+    cancel: function () {
+      if (this.cancelled) return;
+      this.cancelled = true;
+      if (this.rafId) cancelAnimationFrame(this.rafId);
+      el.style.scrollSnapType = prevSnap || ""; // restore CSS snap immediately
+    }
+  };
+  if (Math.abs(delta) < 1) { if (done) done(); return handle; }
+
+  el.style.scrollSnapType = "none"; // don't let snap fight the tween
   let t0 = null;
   function frame(now) {
+    if (handle.cancelled) return;
     if (t0 === null) t0 = now;
     const t = Math.min(1, (now - t0) / duration);
-    const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic ~ cubic-bezier(0.16,1,0.3,1)
     el.scrollLeft = start + delta * eased;
     if (t < 1) {
-      requestAnimationFrame(frame);
+      handle.rafId = requestAnimationFrame(frame);
     } else {
-      el.style.scrollSnapType = prevSnap || "";
+      el.style.scrollSnapType = prevSnap || ""; // no-op: we landed on a snap point
       if (done) done();
     }
   }
-  requestAnimationFrame(frame);
+  handle.rafId = requestAnimationFrame(frame);
+  return handle;
 }
 
 /* Count-up: metric figures tick from 0 up to their value the first time the

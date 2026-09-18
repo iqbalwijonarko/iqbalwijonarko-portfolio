@@ -300,24 +300,20 @@ mark.is-visible {
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
+  /* proximity, not mandatory: mandatory snap on a 3.5-card partial-peek row
+     fought trackpad/wheel momentum at every rest (the "grabby" feel). Mobile
+     restates mandatory below, where one card fills the view. */
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 28px; /* snapped/focused cards clear the 28px edge fade */
+  scroll-behavior: auto;     /* the JS tween owns programmatic scroll */
   scrollbar-width: none;
-  padding: 6px 0 10px; /* room for the card shadow and hover lift */
-  /* Soften the edges so a half-visible card dissolves instead of being sliced
-     by the container edge. A mask beats an overlay gradient here: it needs no
-     extra element and does not assume the page background is white, so it
-     still works if the section ever sits on a tint. The two custom properties
-     are driven from JS, which sets an edge only on the side that actually has
-     more content, so the first and last card never fade for no reason. */
-  --edge-l: 0px;
-  --edge-r: 0px;
-  -webkit-mask-image: linear-gradient(to right,
-    transparent 0, #000 var(--edge-l),
-    #000 calc(100% - var(--edge-r)), transparent 100%);
-  mask-image: linear-gradient(to right,
-    transparent 0, #000 var(--edge-l),
-    #000 calc(100% - var(--edge-r)), transparent 100%);
-  transition: -webkit-mask-image 0.25s ease, mask-image 0.25s ease;
+  padding: 6px 0 10px;       /* room for card shadow + hover lift */
+  /* The edge fade is NOT a mask here. Animating mask-image has no compositor
+     path, so the old per-frame --edge writes repainted the whole scroller
+     mid-scroll (the real source of the jank). It now lives on .card-viewport
+     as an opacity-only overlay: compositor-safe, and crisp at rest. Because
+     nothing mask/filter-like touches the scroller, composited off-main-thread
+     scrolling is never defeated on low-end phones. */
 }
 
 .card-grid::-webkit-scrollbar {
@@ -331,6 +327,9 @@ mark.is-visible {
 .card-grid > * {
   flex: 0 0 28.5%;
   scroll-snap-align: start;
+  /* scroll-snap-stop:always is deliberately NOT here: on the desktop proximity
+     row it would halt a fling at every card. Paddle paging stays exactly one
+     card via the measured-offset JS tween. Restated mobile-only below. */
 }
 
 /* The page-wide reveal slides elements down 18px. A transformed child counts
@@ -339,6 +338,29 @@ mark.is-visible {
 .card-grid > .reveal {
   transform: none;
 }
+
+/* Edge fade: opacity-only overlays pinned to the scrollport edges (JS wraps
+   each .card-grid in a .card-viewport). Opacity is compositor-only, so this
+   never repaints the scroller. Crisp at rest (opacity 0); fades in per side
+   only once there is content to scroll toward, toggled by a class in the
+   already-rAF-throttled scroll handler. Gradients go to #fff (the body bg). */
+.card-viewport { position: relative; }
+.card-viewport::before,
+.card-viewport::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  z-index: 2;
+  pointer-events: none; /* cards under the fade stay clickable */
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.card-viewport::before { left: 0;  background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0)); }
+.card-viewport::after  { right: 0; background: linear-gradient(to left,  #fff, rgba(255, 255, 255, 0)); }
+.card-viewport.is-fade-start::before { opacity: 1; }
+.card-viewport.is-fade-end::after    { opacity: 1; }
 
 /* Apple-style circular paddle controls, right-aligned under the row. */
 .carousel-nav {
@@ -354,40 +376,98 @@ mark.is-visible {
   display: none;
 }
 
+/* Tier 0 -- opaque fallback for any engine without backdrop-filter: a clean
+   pill, never see-through mush. */
 .carousel-btn {
+  position: relative;
+  overflow: hidden;            /* clips the specular sheen to the circle */
   width: 36px;
   height: 36px;
   padding: 0;
   border: none;
   border-radius: 50%;
-  /* Apple paddlenav grays */
-  background: rgba(210, 210, 215, 0.64);
-  color: rgba(0, 0, 0, 0.56);
+  background: rgba(245, 245, 247, 0.92);
+  color: rgba(0, 0, 0, 0.62);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10), 0 4px 14px rgba(0, 0, 0, 0.06);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  transform: scale(1);
+  transition: transform 300ms cubic-bezier(0.34, 1.25, 0.64, 1),
+              background 0.2s ease, color 0.2s ease,
+              box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
-.carousel-btn:hover {
-  background: rgba(210, 210, 215, 0.9);
-  color: rgba(0, 0, 0, 0.72);
+.carousel-btn svg { position: relative; z-index: 1; width: 34px; height: 34px; }
+.carousel-btn:hover { color: rgba(0, 0, 0, 0.8); }
+.carousel-btn:active { transform: scale(0.96); } /* gel press */
+.carousel-btn:disabled { opacity: 0.42; cursor: default; transform: none; }
+.carousel-btn:disabled:active { transform: none; }
+.carousel-btn:focus-visible { outline: 2px solid rgba(0, 122, 255, 0.65); outline-offset: 2px; }
+
+/* Tier 1 -- iOS-26 Liquid Glass. Both prefixes so prefixed-only Safari passes
+   the gate. blur(20px) saturate(180%) is the same idiom already on .site-nav,
+   so the pills read as consistent native chrome. On a near-white ground the
+   RIM + SHADOW (not the blur) carry the material. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .carousel-btn {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.5));
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.66);
+    box-shadow:
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.06),
+      0 4px 14px rgba(0, 0, 0, 0.10),
+      0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  .carousel-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.85;
+    background: radial-gradient(120% 90% at 30% 0%,
+      rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 55%);
+    transition: opacity 0.2s ease;
+  }
+  .carousel-btn:hover {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
+    box-shadow:
+      inset 0 1px 0.5px rgba(255, 255, 255, 1),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.07),
+      0 6px 18px rgba(0, 0, 0, 0.12),
+      0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  .carousel-btn:active {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+  }
+  .carousel-btn:active::before { opacity: 1; }
 }
 
-.carousel-btn:active {
-  background: rgba(190, 190, 196, 1);
-}
+/* Perf hygiene: isolate reflow/scroll-anchor churn per section. `layout` only,
+   never `paint` (paint would clip the mobile full-bleed and the shadows). */
+#experience, #education, #projects { contain: layout; }
 
-.carousel-btn:disabled {
-  opacity: 0.42;
-  cursor: default;
+/* Reduced motion: no gel spring, no fade transition (JS also jumps instantly). */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-btn { transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease; }
+  .carousel-btn:active { transform: none; }
+  .card-viewport::before, .card-viewport::after { transition: none; }
 }
-
-.carousel-btn svg {
-  width: 34px;
-  height: 34px;
+/* Reduced transparency: opaque pill, no blur, no sheen (Chrome/Safari honor it;
+   Firefox does not implement it and keeps the legible glass -- acceptable). */
+@media (prefers-reduced-transparency: reduce) {
+  .carousel-btn {
+    background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .carousel-btn::before { display: none; }
 }
 
 /* Experience & Education cards */
@@ -522,10 +602,8 @@ mark.is-visible {
 
 /* ===== Responsive ===== */
 @media (max-width: 900px) {
-  .card-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
+  /* (removed a dead grid-template-columns rule: .card-grid is a flex scroller
+     now, so grid-template did nothing.) */
   #site-title {
     font-size: 2.4rem;
   }
@@ -577,17 +655,23 @@ mark.is-visible {
   /* The carousel itself is defined once up top; a phone only needs a tighter
      gap, one card per snap, and a full-bleed row so cards run to the screen
      edge while the first still lines up under the heading. */
+  /* Full-bleed moves to the WRAPPER so the edge-fade overlays reach the screen
+     edge; the grid keeps its 26px padding so the first card lines up under the
+     heading. */
+  .card-viewport { margin: 0 -26px; }
+  .card-viewport::before,
+  .card-viewport::after { width: 26px; }
   .card-grid {
     gap: 14px;
     -webkit-overflow-scrolling: touch;
-    margin: 0 -26px;
     padding: 6px 26px 16px;
     scroll-padding-left: 26px;
+    scroll-snap-type: x mandatory; /* one card per view: mandatory is right here */
   }
 
   .card-grid > * {
     flex: 0 0 80%;
-    scroll-snap-stop: always;
+    scroll-snap-stop: always;      /* deterministic one-card paging, MOBILE ONLY */
   }
 
   .carousel-nav {
