@@ -351,20 +351,52 @@ mark.is-visible {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 22px;
+  width: 44px;
   z-index: 2;
-  pointer-events: none; /* cards under the fade stay clickable */
+  pointer-events: none;  /* cards under the fade stay clickable */
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.3s ease;
+  /* A real frosted-glass edge: BLUR the peeking card instead of whitening it.
+     A white scrim washes out a dark card (too bright); a backdrop blur frosts
+     whatever passes under it, staying dark on dark and invisible on the white
+     gaps. The mask tapers the blur -- strongest at the very edge, gone before
+     it reaches a focused card -- so it reads as a soft glass melt, not a band.
+     A whisper of white gives it a faint glassy sheen without brightening. */
+  background: linear-gradient(to var(--fade-dir, left),
+    rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
-.card-viewport::before { left: 0;  background: linear-gradient(to right,
-  #fff 0%, rgba(255, 255, 255, 0.98) 12%, rgba(255, 255, 255, 0.82) 30%,
-  rgba(255, 255, 255, 0.45) 55%, rgba(255, 255, 255, 0.14) 80%, rgba(255, 255, 255, 0) 100%); }
-.card-viewport::after  { right: 0; background: linear-gradient(to left,
-  #fff 0%, rgba(255, 255, 255, 0.98) 12%, rgba(255, 255, 255, 0.82) 30%,
-  rgba(255, 255, 255, 0.45) 55%, rgba(255, 255, 255, 0.14) 80%, rgba(255, 255, 255, 0) 100%); }
+.card-viewport::before {
+  left: 0;
+  --fade-dir: right;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0) 100%);
+}
+.card-viewport::after {
+  right: 0;
+  --fade-dir: left;
+  -webkit-mask-image: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0) 100%);
+}
 .card-viewport.is-fade-start::before { opacity: 1; }
 .card-viewport.is-fade-end::after    { opacity: 1; }
+
+/* No-backdrop-filter engines: fall back to a very light scrim (subtle, so it
+   never reads as a bright band). */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card-viewport::before { background: linear-gradient(to right, rgba(255,255,255,0.6), rgba(255,255,255,0)); }
+  .card-viewport::after  { background: linear-gradient(to left,  rgba(255,255,255,0.6), rgba(255,255,255,0)); }
+}
+/* Reduced transparency: drop the glass blur, use a faint scrim. */
+@media (prefers-reduced-transparency: reduce) {
+  .card-viewport::before, .card-viewport::after {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .card-viewport::before { background: linear-gradient(to right, rgba(255,255,255,0.7), rgba(255,255,255,0)); }
+  .card-viewport::after  { background: linear-gradient(to left,  rgba(255,255,255,0.7), rgba(255,255,255,0)); }
+}
 
 /* Apple-style circular paddle controls, right-aligned under the row. */
 .carousel-nav {
@@ -664,7 +696,7 @@ mark.is-visible {
      heading. */
   .card-viewport { margin: 0 -26px; }
   .card-viewport::before,
-  .card-viewport::after { width: 22px; }
+  .card-viewport::after { width: 36px; }
   .card-grid {
     gap: 14px;
     -webkit-overflow-scrolling: touch;
